@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\EmojiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +20,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function(){
     Route::post('/login', [AuthController::class, 'login']);
 });
+
+Route::get('/emojiList', [EmojiController::class, 'index']);
 
 Route::prefix('user')->group(function(){
     Route::post('/create', [UserController::class, 'create']);
