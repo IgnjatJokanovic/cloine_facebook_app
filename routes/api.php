@@ -3,7 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EmojiController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,4 +25,12 @@ Route::get('/emojiList', [EmojiController::class, 'index']);
 
 Route::prefix('user')->group(function(){
     Route::post('/create', [UserController::class, 'create']);
+});
+
+
+
+Route::group(['middleware' => ['jwt']], function () {
+    Route::prefix('post')->group(function(){
+        Route::post('/create', [PostController::class, 'create']);
+    });
 });
