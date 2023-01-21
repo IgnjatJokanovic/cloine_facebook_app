@@ -27,10 +27,15 @@ Route::prefix('user')->group(function(){
     Route::post('/create', [UserController::class, 'create']);
 });
 
+Route::prefix('post')->group(function(){
+    Route::get('/{id}', [PostController::class, 'show']);
+});
+
 
 
 Route::group(['middleware' => ['jwt']], function () {
     Route::prefix('post')->group(function(){
         Route::post('/create', [PostController::class, 'create']);
+        Route::post('/update', [PostController::class, 'update']);
     });
 });

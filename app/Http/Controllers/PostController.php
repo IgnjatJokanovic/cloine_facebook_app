@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Image;
+use App\Models\Post;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -24,32 +26,45 @@ class PostController extends Controller
      */
     public function create()
     {
-        $validator = Validator::make(request()->all(), [
+        $fields = request(
+            [
+                'owner',
+                'creator',
+                'body',
+                'image',
+                'emotion',
+                'taged'
+            ]
+        );
+
+        $validator = Validator::make($fields, [
             'owner' => 'required',
             'creator' => 'required',
             'body' =>  'required_without_all:image,emotion,taged',
             'image' => 'required_without_all:body,emotion,taged',
             'emotion' => 'required_without_all:body,image,taged',
             'taged' => 'required_without_all:body,emotion,image',
+        ], [
+            'body.required_without_all' => 'Cant make empty post, fill something',
+            'image.required_without_all' => 'Cant make empty post, fill something',
+            'emotion.required_without_all' => 'Cant make empty post, fill something',
+            'taged.required_without_all' => 'Cant make empty post, fill something',
         ]);
 
 
         if($validator->fails())
         {
-            return response()->json(['error' => "Please fill out something on a post"], 422);
+            return response()->json(['error' => $validator->errors()->first()], 422);
         }
 
-        if(request()->image != null){
+        $image = self::uploadImage($fields['image']);
+        $emotion = $fields['emotion']['id'] ?? null;
 
-            $name = time()."-post.jpg";
-            self::uploadImage($name, request()->image);
-        }
+        $fields['image_id'] = $image;
+        $fields['emotion_id'] = $emotion;
+        $post = Post::create($fields)->id;
 
-        return response()->json("test");
-
-
-
-
+        return response()->json(['msg' => 'Post created', 'id' => $post]);
     }
 
     /**
@@ -71,7 +86,14 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        //
+        // dd($id);
+        $post = Post::with('owner', 'creator', 'image', 'emotion')->where('id', $id)->first();
+
+        if($post === null){
+            return response()->json(['error' => 'Post not found'], 404);
+        }
+
+        return response()->json($post);
     }
 
     /**
@@ -92,9 +114,59 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update()
     {
-        //
+        $fields = request(
+            [
+                'id',
+                'body',
+                'image',
+                'emotion',
+                'taged'
+            ]
+        );
+
+        $validator = Validator::make($fields, [
+            'id' => 'required',
+            'body' =>  'required_without_all:image,emotion,taged',
+            'image' => 'required_without_all:body,emotion,taged',
+            'emotion' => 'required_without_all:body,image,taged',
+            'taged' => 'required_without_all:body,emotion,image',
+        ], [
+            'body.required_without_all' => 'Cant make empty post, fill something',
+            'image.required_without_all' => 'Cant make empty post, fill something',
+            'emotion.required_without_all' => 'Cant make empty post, fill something',
+            'taged.required_without_all' => 'Cant make empty post, fill something',
+        ]);
+
+
+        if($validator->fails())
+        {
+            return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
+        $post = Post::find(request()->id);
+
+        if($post === null){
+            return response()->json(['error' => 'Post not found'], 404);
+        }
+
+        $image = self::uploadImage($fields['image']);
+        $emotion = $fields['emotion']['id'] ?? null;
+
+        $fields['image_id'] = $image;
+        $fields['emotion_id'] = $emotion;
+
+        $post->body = request()->body;
+        $post->image_id = $image;
+        $post->emotion_id = $emotion;
+        $post->update();
+
+        $post = Post::with('owner', 'creator', 'image', 'emotion')->where('id', request()->id)->first();
+
+
+
+        return response()->json(['msg' => 'Post created', 'post' => $post, 'id' => request()->id]);
     }
 
     /**
@@ -108,13 +180,38 @@ class PostController extends Controller
         //
     }
 
-    private static function uploadImage(string $name, string $fileString)
+    private static function uploadImage(array $fileArray): int|null
     {
-        if (str_contains($fileString, 'data:image')) {
-            $image = base64_decode(substr($fileString, strpos($fileString, ",") + 1));
-            \File::put(public_path() . "/img/$name", $image);
+        // just upload image if is null before
+        if($fileArray['id'] === null && str_contains($fileArray['src'], 'data:image')){
+            Image::destroy($fileArray['id']);
+            return self::uploadBase64($fileArray['src']);
+        }
+        // cleanup image if already exists and setting new
+        if($fileArray['id'] !== null && str_contains($fileArray['src'], 'data:image')){
+            Image::destroy($fileArray['id']);
+            return self::uploadBase64($fileArray['src']);
+        }
+        // cleanup image if already exists
+        if($fileArray['id'] !== null && $fileArray['src'] === null){
+            Image::destroy($fileArray['id']);
+            return null;
         }
 
+        return $fileArray['id'];
 
+
+    }
+
+    private static function uploadBase64(string $base64string): int
+    {
+        $name = time()."-post.jpg";
+        $image = base64_decode(substr($base64string, strpos($base64string, ",") + 1));
+        $path = public_path() . "/img/$name";
+        $hostPath = request()->getSchemeAndHttpHost(). "/img/$name";
+
+        \File::put($path, $image);
+
+        return Image::create(['src' => $hostPath])->id;
     }
 }
