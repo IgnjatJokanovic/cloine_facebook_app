@@ -20,7 +20,7 @@ return [
     /*
     |--------------------------------------------------------------------------
     | Broadcast Connections
-    |--------------------------------------------------------------------------
+    |-------------------------------------------------BROADCAST_DRIVER-------------------------
     |
     | Here you may define all of the broadcast connections that will be used
     | to broadcast events to other systems or over websockets. Samples of
@@ -40,7 +40,8 @@ return [
                 'port' => env('PUSHER_PORT', 443),
                 'scheme' => env('PUSHER_SCHEME', 'https'),
                 'encrypted' => true,
-                'useTLS' => env('PUSHER_SCHEME', 'https') === 'https',
+                'useTLS' => true,
+                'cluster' => env('PUSHER_APP_CLUSTER', 'eu'),
             ],
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html

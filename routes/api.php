@@ -31,6 +31,8 @@ Route::prefix('post')->group(function(){
     Route::get('/{id}', [PostController::class, 'show']);
 });
 
+Route::get('/kita',  [PostController::class, 'kita']);
+
 
 
 Route::group(['middleware' => ['jwt']], function () {

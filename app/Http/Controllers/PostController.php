@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\FriendshipSent;
 use App\Models\Image;
 use App\Models\Post;
 use Illuminate\Http\Request;
@@ -17,6 +18,12 @@ class PostController extends Controller
     public function index()
     {
         //
+    }
+
+    public function kita()
+    {
+        broadcast(new FriendshipSent('baja', 'paja'))->toOthers();
+       return response()->json('test', 200);
     }
 
     /**
