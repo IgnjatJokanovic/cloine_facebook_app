@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Post extends Model
 {
     use HasFactory;
+    // protected $hidden = ['pivot'];
 
     protected $fillable = [
         'body',
@@ -35,5 +37,20 @@ class Post extends Model
     public function emotion()
     {
         return $this->belongsTo(Emoji::class, 'emotion_id');
+    }
+
+    public function reactions()
+    {
+        return $this->belongsToMany(Emoji::class, 'reactions', 'post_id', 'reaction_id');
+    }
+
+    public function distinctReactions()
+    {
+        return  $this->reactions()->select(
+            'emoji.*',
+            DB::raw('count(reactions.reaction_id) as reaction_count')
+            )
+            ->groupBy('emoji.id', 'reactions.post_id', 'reactions.reaction_id');
+
     }
 }

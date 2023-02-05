@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('emoji', function (Blueprint $table) {
             $table->id();
             $table->string("code");
-            $table->string("desctiption")->nullable();
+            $table->string("description")->nullable();
             $table->enum('type', ['emotion', 'reaction', 'emoji'])->index()->default('emoji');
             $table->timestamps();
         });

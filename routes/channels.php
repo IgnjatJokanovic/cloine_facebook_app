@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Reaction;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Log;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +19,10 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
 
-Broadcast::channel('chat', function() {
-    return true;
+Broadcast::channel('chat.{$id}', function($name, $id) {
+    return $name === $id;
+});
+
+Broadcast::channel('postReaction.{$id}', function($reaction, $id) {
+    return (int) $reaction->post_id === (int) $id;
 });

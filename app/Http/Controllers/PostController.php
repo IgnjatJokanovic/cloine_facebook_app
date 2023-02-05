@@ -5,7 +5,12 @@ namespace App\Http\Controllers;
 use App\Events\FriendshipSent;
 use App\Models\Image;
 use App\Models\Post;
+use App\Models\Reaction;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Validator;
 
 class PostController extends Controller
@@ -17,13 +22,11 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
-    }
+        $posts = Post::with('distinctReactions')
+                    ->withCount('distinctReactions')
+                    ->paginate(10);
 
-    public function kita()
-    {
-        broadcast(new FriendshipSent('baja', 'paja'))->toOthers();
-       return response()->json('test', 200);
+        return response()->json($posts);
     }
 
     /**
@@ -94,10 +97,39 @@ class PostController extends Controller
     public function show($id)
     {
         // dd($id);
-        $post = Post::with('owner', 'creator', 'image', 'emotion')->where('id', $id)->first();
+        $post = Post::with(
+                    [
+                        'owner',
+                        'creator',
+                        'image',
+                        'emotion',
+                        'distinctReactions'
+                    ]
+                )
+                ->where('id', $id)
+                ->first();
+
+        $userId = null;
+        $post->currentUserReaction = null;
+
+        try {
+            $payload = JWTAuth::parseToken()->getPayload();
+            $userId = $payload->get('id');
+        } catch (Exception $e) {
+
+        }
 
         if($post === null){
             return response()->json(['error' => 'Post not found'], 404);
+        }
+
+        if($userId !== null){
+            $post->currentUserReaction = Reaction::with('emotion')
+                                            ->where([
+                                                'user_id' => $userId,
+                                                'post_id' => $id
+                                            ])
+                                            ->first();
         }
 
         return response()->json($post);
