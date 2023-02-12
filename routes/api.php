@@ -5,6 +5,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\EmojiController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReactionController;
+use App\Http\Controllers\FriendController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,6 +26,7 @@ Route::prefix('auth')->group(function(){
 Route::get('/emojiList', [EmojiController::class, 'index']);
 
 Route::prefix('user')->group(function(){
+    Route::get('/show/{id}', [UserController::class, 'show']);
     Route::post('/create', [UserController::class, 'create']);
 });
 
@@ -43,5 +45,13 @@ Route::group(['middleware' => ['jwt']], function () {
 
     Route::prefix('reaction')->group(function(){
         Route::post('/create', [ReactionController::class, 'create']);
+    });
+
+    Route::prefix('friend')->group(function(){
+        Route::post('/add', [FriendController::class, 'create']);
+        Route::post('/decline', [FriendController::class, 'decline']);
+        Route::post('/accept', [FriendController::class, 'accept']);
+        Route::post('/markAsRead', [FriendController::class, 'markAsRead']);
+        Route::get('/notifications', [FriendController::class, 'index']);
     });
 });

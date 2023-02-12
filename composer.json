@@ -7,6 +7,7 @@
     "require": {
         "php": "^8.0.2",
         "guzzlehttp/guzzle": "^7.2",
+        "korridor/laravel-has-many-merged": "^0.0.3",
         "laravel/fortify": "^1.13",
         "laravel/framework": "^9.19",
         "laravel/horizon": "^5.10",
@@ -15,6 +16,7 @@
         "laravel/tinker": "^2.7",
         "predis/predis": "^2.1",
         "pusher/pusher-php-server": "^7.2",
+        "staudenmeir/laravel-merged-relations": "^1.0",
         "tymon/jwt-auth": "^1.0"
     },
     "require-dev": {

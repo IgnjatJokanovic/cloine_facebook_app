@@ -2,15 +2,16 @@
 
 namespace App\Events;
 
-use App\Models\Reaction;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class PostReactedAction implements ShouldBroadcastNow
+class FrieendRequestSent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -20,26 +21,24 @@ class PostReactedAction implements ShouldBroadcastNow
      * @return void
      */
     public function __construct(
-        public Reaction $reaction,
-        public string $action
+        public $user
     )
-    {}
+    {
+        //
+    }
 
     public function broadcastWith()
     {
         // This must always be an array. Since it will be parsed with json_encode()
         return [
-            'reaction' => $this->reaction,
-            'action' => $this->action,
+            'user' => $this->user
         ];
     }
 
     public function broadcastAs(): string
     {
-        return 'reaction';
+        return 'recieved';
     }
-
-
 
     /**
      * Get the channels the event should broadcast on.
@@ -48,6 +47,6 @@ class PostReactedAction implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('postReaction.'.$this->reaction->post_id);
+        return new Channel('friendRequestSent.'.$this->user->to);
     }
 }

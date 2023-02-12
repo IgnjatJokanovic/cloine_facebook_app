@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Friend;
+use App\Models\Friends;
 use App\Models\User;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Validator;
 
 class UserController extends Controller
@@ -74,7 +79,38 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        //
+        $user = User::with('acceptedFriends')
+                    ->where('id', $id)
+                    ->first();
+
+        if($user === null){
+            return response()->json('User not found', 404);
+        }
+
+        $userId = null;
+        try{
+            $payload = JWTAuth::parseToken()->getPayload();
+            $userId = $payload->get('id');
+        }catch(Exception $e){
+        }
+
+        $user->isFriends = null;
+
+        if((int)$userId !== (int)$id && $userId !== null){
+            // Load is friend relationship
+            Log::debug("usoi, $userId, $id");
+            $user->isFriends = Friend::where(function ($q) use ($id, $userId){
+                                    $q->where('to', $id)
+                                    ->orWhere('from', $userId);
+                                })
+                                ->orWhere(function($q) use ($id, $userId){
+                                    $q->where('to', $userId)
+                                    ->orWhere('from', $id);
+                                })->first();
+
+        }
+
+        return response()->json($user);
     }
 
     /**
