@@ -88,6 +88,40 @@ class PostController extends Controller
         //
     }
 
+    public function userRelated(int $id)
+    {
+        $posts = Post::with(
+                        [
+                            'owner',
+                            'creator',
+                            'image',
+                            'emotion',
+                            'distinctReactions',
+                        ]
+                    )
+                    ->where(function($q) use ($id){
+                        $q->where('creator', $id)
+                          ->orWhere('owner', $id);
+                    })
+                    ->orderByDesc('posts.created_at')
+                    ->paginate(6);
+
+        return response()->json($posts);
+    }
+
+    public function userRelatedPhotos(int $id, int|null $take = null)
+    {
+        $posts = Post::with('image')
+                    ->where('creator', $id)
+                    ->where('image_id', '!=', null);
+
+        if($take){
+            return response()->json($posts->take(6)->get());
+        }
+
+        return response()->json($posts->paginate(6));
+    }
+
     /**
      * Display the specified resource.
      *
@@ -109,27 +143,8 @@ class PostController extends Controller
                 ->where('id', $id)
                 ->first();
 
-        $userId = null;
-        $post->currentUserReaction = null;
-
-        try {
-            $payload = JWTAuth::parseToken()->getPayload();
-            $userId = $payload->get('id');
-        } catch (Exception $e) {
-
-        }
-
         if($post === null){
             return response()->json(['error' => 'Post not found'], 404);
-        }
-
-        if($userId !== null){
-            $post->currentUserReaction = Reaction::with('emotion')
-                                            ->where([
-                                                'user_id' => $userId,
-                                                'post_id' => $id
-                                            ])
-                                            ->first();
         }
 
         return response()->json($post);
@@ -205,7 +220,7 @@ class PostController extends Controller
 
 
 
-        return response()->json(['msg' => 'Post created', 'post' => $post, 'id' => request()->id]);
+        return response()->json(['msg' => 'Post updated', 'post' => $post, 'id' => request()->id]);
     }
 
     /**
@@ -214,9 +229,21 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function delete()
     {
-        //
+        $post = Post::find(request()->id);
+
+        if($post === null){
+            return response()->json('Post not found', 404);
+        }
+        $image = $post->image()->first();
+        if($image !== null){
+            Log::debug('uso');
+            \File::delete(public_path() . $image->src);
+        }
+        $post->delete();
+
+        return response()->json('Post deleted', 200);
     }
 
     private static function uploadImage(array $fileArray): int|null
@@ -247,10 +274,9 @@ class PostController extends Controller
         $name = time()."-post.jpg";
         $image = base64_decode(substr($base64string, strpos($base64string, ",") + 1));
         $path = public_path() . "/img/$name";
-        $hostPath = request()->getSchemeAndHttpHost(). "/img/$name";
 
         \File::put($path, $image);
 
-        return Image::create(['src' => $hostPath])->id;
+        return Image::create(['src' => "/img/$name"])->id;
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class Image extends Model
 {
@@ -17,9 +18,11 @@ class Image extends Model
     public static function boot()
     {
         parent::boot();
-        static::deleted(function($image)
+
+        static::deleting(function($image)
         {
-            \File::delete($image->src);
+            Log::debug('uso');
+            \File::delete(public_path() . $image->src);
         });
     }
 }

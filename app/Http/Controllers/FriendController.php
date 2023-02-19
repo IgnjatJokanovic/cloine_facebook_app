@@ -17,7 +17,7 @@ class FriendController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function pending()
     {
         $payload = JWTAuth::parseToken()->getPayload();
         $id = $payload->get('id');
@@ -28,6 +28,20 @@ class FriendController extends Controller
 
         return response()->json($pending);
     }
+
+    public function userFriends(int $id, int|null $take = null)
+    {
+        $friends =  User::friendsQuerry($id);
+
+        if($take){
+            return response()->json($friends->take(6)->get());
+        }
+
+        return response()->json($friends->paginate(6));
+    }
+
+
+
 
     /**
      * Show the form for creating a new resource.

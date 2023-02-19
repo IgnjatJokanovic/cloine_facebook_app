@@ -31,7 +31,13 @@ Route::prefix('user')->group(function(){
 });
 
 Route::prefix('post')->group(function(){
-    Route::get('/{id}', [PostController::class, 'show']);
+    Route::get('/userRelated/photos/{id}/{take?}', [PostController::class, 'userRelatedPhotos']);
+    Route::get('/userRelated/{id}', [PostController::class, 'userRelated']);
+    Route::get('/show/{id}', [PostController::class, 'show']);
+});
+
+Route::prefix('friend')->group(function(){
+    Route::get('/userFriends/{id}/{take?}', [FriendController::class, 'userFriends']);
 });
 
 
@@ -41,6 +47,7 @@ Route::group(['middleware' => ['jwt']], function () {
         Route::get('/', [PostController::class, 'index']);
         Route::post('/create', [PostController::class, 'create']);
         Route::post('/update', [PostController::class, 'update']);
+        Route::post('/delete', [PostController::class, 'delete']);
     });
 
     Route::prefix('reaction')->group(function(){
@@ -52,6 +59,6 @@ Route::group(['middleware' => ['jwt']], function () {
         Route::post('/decline', [FriendController::class, 'decline']);
         Route::post('/accept', [FriendController::class, 'accept']);
         Route::post('/markAsRead', [FriendController::class, 'markAsRead']);
-        Route::get('/notifications', [FriendController::class, 'index']);
+        Route::get('/pending', [FriendController::class, 'pending']);
     });
 });

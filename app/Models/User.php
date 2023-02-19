@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
 use SebastianBergmann\Type\FalseType;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -97,32 +98,57 @@ class User extends Authenticatable implements JWTSubject
     }
 
 
-    public function allFriends()
+    public function friendsFrom()
     {
         return $this->belongsToMany(self::class, 'friends', 'to', 'from')->withPivot(['accepted', 'opened', 'to', 'from']);
     }
 
-    public function hasFriend($id)
+    public function friendsTo()
     {
-        return $this->allFriends()
-                    ->where('friends.to', $id)
-                    ->orWhere('friends.from', $id);
+        return $this->belongsToMany(self::class, 'friends', 'from', 'to')->withPivot(['accepted', 'opened', 'to', 'from']);
+    }
+
+    public function accepted()
+    {
+        return $this->friendsFrom()
+                    ->where("accepted", true)
+                    ->merge(
+                        $this->friendsTo()
+                             ->where('accepted', true)
+                    );
     }
 
 
-    public function acceptedFriends()
-    {
-        return $this->allFriends()
-                    ->with('profilePhoto.image')
-                    ->where('friends.accepted', true)
-                    ->orderBy('friends.opened', 'desc');
-    }
 
     public function pending()
     {
-        return $this->allFriends()
+        return $this->friendsFrom()
                     ->with('profilePhoto.image')
                     ->where('friends.accepted', false)
                     ->orderBy('friends.opened', 'desc');
+    }
+
+    public static function friendsQuerry($id)
+    {
+        return DB::table('friends')
+                ->select(
+                    'users.id',
+                    'users.firstName',
+                    'users.lastName',
+                    'i1.src as profile',
+                    // 'i2.src as cover'
+                )
+                ->join('users', function ($join) use ($id) {
+                    $join->on(DB::raw('CASE friends.to WHEN '.$id.' THEN friends.from ELSE friends.to END'), '=', 'users.id');
+                })
+                ->leftJoin('posts as p1', 'users.profile', '=', 'p1.id')
+                ->leftJoin('images as i1', 'p1.image_id', '=', 'i1.id')
+                // ->leftJoin('posts as p2', 'users.cover', '=', 'p2.id')
+                // ->leftJoin('images as i2', 'p2.image_id', '=', 'i2.id')
+                ->where('friends.accepted', true)
+                ->where(function($q) use($id){
+                    $q->where('friends.to', $id)
+                    ->orWhere('friends.from', $id);
+                });
     }
 }

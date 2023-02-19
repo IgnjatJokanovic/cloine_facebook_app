@@ -8,6 +8,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Validator;
@@ -19,7 +20,7 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -77,12 +78,11 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(int $id): JsonResponse
     {
-        $user = User::with('acceptedFriends')
+        $user = User::with('profilePhoto', 'coverPhoto')
                     ->where('id', $id)
                     ->first();
-
         if($user === null){
             return response()->json('User not found', 404);
         }
@@ -100,13 +100,16 @@ class UserController extends Controller
             // Load is friend relationship
             Log::debug("usoi, $userId, $id");
             $user->isFriends = Friend::where(function ($q) use ($id, $userId){
-                                    $q->where('to', $id)
-                                    ->orWhere('from', $userId);
+                                    $q->where([
+                                        'to' => $id,
+                                        'from' => $userId
+                                    ])
+                                    ->orWhere([
+                                        'to' => $userId,
+                                        'from' => $id
+                                    ]);
                                 })
-                                ->orWhere(function($q) use ($id, $userId){
-                                    $q->where('to', $userId)
-                                    ->orWhere('from', $id);
-                                })->first();
+                                ->first();
 
         }
 

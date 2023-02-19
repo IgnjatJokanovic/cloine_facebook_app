@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 class Post extends Model
 {
@@ -18,6 +21,26 @@ class Post extends Model
         'image_id',
         'emotion_id',
     ];
+
+    protected $appends = ['currentUserReaction'];
+
+    public function getCurrentUserReactionAttribute($value)
+    {
+        try {
+            $payload = JWTAuth::parseToken()->getPayload();
+            $userId = $payload->get('id');
+            return  Reaction::with('emotion')
+                        ->where([
+                            'user_id' => $userId,
+                            'post_id' => $this->id
+                        ])
+                        ->first();
+        } catch (Exception $e) {
+
+        }
+
+        return null;
+    }
 
     public function creator()
     {
@@ -52,5 +75,31 @@ class Post extends Model
             )
             ->groupBy('emoji.id', 'reactions.post_id', 'reactions.reaction_id');
 
+    }
+
+    public function currentUserReaction(){
+         try {
+            $payload = JWTAuth::parseToken()->getPayload();
+            $userId = $payload->get('id');
+            return  Reaction::with('emotion')
+                        ->where([
+                            'user_id' => $userId,
+                            'post_id' => $this->id
+                        ])
+                        ->first();
+        } catch (Exception $e) {
+
+        }
+
+        return null;
+    }
+
+    public static function boot()
+    {
+        parent::boot();
+        static::deleting(function($post){
+            Log::debug('uso u post');
+           $post->image()->delete();
+        });
     }
 }

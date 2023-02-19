@@ -16,8 +16,8 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->unsignedBigInteger("profile")->nullable();
             $table->unsignedBigInteger("cover")->nullable();
-            $table->foreign('profile')->references('id')->on('posts')->onDelete('cascade');
-            $table->foreign('cover')->references('id')->on('posts')->onDelete('cascade');
+            $table->foreign('profile')->references('id')->on('posts')->onDelete('set null');
+            $table->foreign('cover')->references('id')->on('posts')->onDelete('set null');
         });
     }
 
