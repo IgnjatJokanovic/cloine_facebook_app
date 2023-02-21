@@ -128,27 +128,37 @@ class User extends Authenticatable implements JWTSubject
                     ->orderBy('friends.opened', 'desc');
     }
 
-    public static function friendsQuerry($id)
+    public static function friendsQuerry(int $id, ?string $search = null, ?int $excluded = null)
     {
-        return DB::table('friends')
+        $query = DB::table('friends')
                 ->select(
                     'users.id',
                     'users.firstName',
                     'users.lastName',
                     'i1.src as profile',
-                    // 'i2.src as cover'
                 )
                 ->join('users', function ($join) use ($id) {
                     $join->on(DB::raw('CASE friends.to WHEN '.$id.' THEN friends.from ELSE friends.to END'), '=', 'users.id');
                 })
                 ->leftJoin('posts as p1', 'users.profile', '=', 'p1.id')
                 ->leftJoin('images as i1', 'p1.image_id', '=', 'i1.id')
-                // ->leftJoin('posts as p2', 'users.cover', '=', 'p2.id')
-                // ->leftJoin('images as i2', 'p2.image_id', '=', 'i2.id')
                 ->where('friends.accepted', true)
                 ->where(function($q) use($id){
                     $q->where('friends.to', $id)
                     ->orWhere('friends.from', $id);
                 });
+
+        if($search){
+            $query->where(function($q) use($search){
+                $q->where('users.firstName', 'ILIKE', "%$search%")
+                  ->orWhere('users.lastName', "ILIKE", "%$search%");
+            });
+        }
+
+        if($excluded){
+            $query->where('users.id', $excluded);
+        }
+
+        return $query;
     }
 }

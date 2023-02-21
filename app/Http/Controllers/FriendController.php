@@ -7,6 +7,7 @@ use App\Events\FrieendRequestSent;
 use App\Models\Friend;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Validator;
 
@@ -92,15 +93,23 @@ class FriendController extends Controller
 
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+
+    public function searchCurrentUser()
     {
-        //
+        $search = request()->search;
+        $exlude = request()->exlude;
+        Log::debug(request()->all());
+        $payload = JWTAuth::parseToken()->getPayload();
+        $userId = (int)$payload->get('id');
+
+        $friends =  User::friendsQuerry($userId, $search);
+
+        if((int)$exlude !== (int)$userId){
+            Log::debug("$exlude, $userId");
+            $friends->where('users.id', '!=', $exlude);
+        }
+
+        return response()->json($friends->paginate(6));
     }
 
     /**
