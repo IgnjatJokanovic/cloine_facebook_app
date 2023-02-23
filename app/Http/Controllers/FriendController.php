@@ -171,10 +171,9 @@ class FriendController extends Controller
     public function accept()
     {
         $id = request()->id;
-        $payload = JWTAuth::parseToken()->getPayload();
-        $userId = $payload->get('id');
-
-        $this->updatePivot($id, $userId, 'accepted', true);
+        $user = auth()->user();
+        Log::debug('accepting');
+        $user->friendsFrom()->updateExistingPivot($id, ['accepted' => true]);
 
         return response()->json('Accepted friend request', 201);
     }
@@ -184,7 +183,7 @@ class FriendController extends Controller
         $id = request()->id;
         $payload = JWTAuth::parseToken()->getPayload();
         $userId = $payload->get('id');
-
+        Log::debug('accepting');
         $friend = Friend::where(function ($q) use ($id, $userId){
             $q->where('to', $id)
             ->orWhere('from', $userId);

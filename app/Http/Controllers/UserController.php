@@ -87,32 +87,6 @@ class UserController extends Controller
             return response()->json('User not found', 404);
         }
 
-        $userId = null;
-        try{
-            $payload = JWTAuth::parseToken()->getPayload();
-            $userId = $payload->get('id');
-        }catch(Exception $e){
-        }
-
-        $user->isFriends = null;
-
-        if((int)$userId !== (int)$id && $userId !== null){
-            // Load is friend relationship
-            Log::debug("usoi, $userId, $id");
-            $user->isFriends = Friend::where(function ($q) use ($id, $userId){
-                                    $q->where([
-                                        'to' => $id,
-                                        'from' => $userId
-                                    ])
-                                    ->orWhere([
-                                        'to' => $userId,
-                                        'from' => $id
-                                    ]);
-                                })
-                                ->first();
-
-        }
-
         return response()->json($user);
     }
 

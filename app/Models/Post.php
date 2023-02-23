@@ -62,6 +62,11 @@ class Post extends Model
         return $this->belongsTo(Emoji::class, 'emotion_id');
     }
 
+    public function taged()
+    {
+        return $this->belongsToMany(User::class, 'user_posts', 'post_id', 'user_id');
+    }
+
     public function reactions()
     {
         return $this->belongsToMany(Emoji::class, 'reactions', 'post_id', 'reaction_id');

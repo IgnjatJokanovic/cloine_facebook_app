@@ -3,13 +3,17 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\HasApiTokens;
 use SebastianBergmann\Type\FalseType;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -49,7 +53,7 @@ class User extends Authenticatable implements JWTSubject
     ];
 
 
-    protected $appends = ['accepted', 'opened', 'to'];
+    protected $appends = ['accepted', 'opened', 'to', 'isFriends'];
 
     public function getJWTIdentifier()
     {
@@ -71,10 +75,37 @@ class User extends Authenticatable implements JWTSubject
         return $this->pivot?->to;
     }
 
-    // public function getFromdAttribute($value)
-    // {
-    //     return $this->pivot?->from;
-    // }
+    public function getIsFriendsAttribute($value)
+    {
+        $userId = null;
+        
+        try{
+            $payload = JWTAuth::parseToken()->getPayload();
+            $userId = (int)$payload->get('id');
+        }catch(Exception $e){
+        }
+
+        $isFriends = null;
+
+        if($userId !== (int)$this->id && $userId !== null){
+
+            $isFriends = DB::table('friends')
+                            ->where(function ($query) use ($userId) {
+                                $query->where([
+                                    'from' => $userId,
+                                    'to'   => $this->id,
+                                ])->orWhere(function ($query) use ($userId) {
+                                    $query->where([
+                                            'from' => $this->id,
+                                            'to' => $userId,
+                                        ]);
+                                });
+                            })
+                            ->first();
+        }
+
+        return $isFriends;
+    }
 
     public function getJWTCustomClaims()
     {

@@ -72,9 +72,15 @@ class PostController extends Controller
 
         $fields['image_id'] = $image;
         $fields['emotion_id'] = $emotion;
-        $post = Post::create($fields)->id;
+        $post = Post::create($fields);
+        $taged = request()->taged;
+        Log::debug($post);
+        if($taged !== null){
+            $ids = collect($taged)->pluck('id');
+            $post->taged()->attach($ids);
+        }
 
-        return response()->json(['msg' => 'Post created', 'id' => $post]);
+        return response()->json(['msg' => 'Post created', 'id' => $post->id]);
     }
 
     /**
@@ -97,6 +103,7 @@ class PostController extends Controller
                             'image',
                             'emotion',
                             'distinctReactions',
+                            'taged',
                         ]
                     )
                     ->where(function($q) use ($id){
@@ -137,7 +144,8 @@ class PostController extends Controller
                         'creator',
                         'image',
                         'emotion',
-                        'distinctReactions'
+                        'distinctReactions',
+                        'taged',
                     ]
                 )
                 ->where('id', $id)
