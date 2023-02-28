@@ -22,7 +22,7 @@ class Post extends Model
         'emotion_id',
     ];
 
-    protected $appends = ['currentUserReaction'];
+    protected $appends = ['currentUserReaction', 'commentCount'];
 
     public function getCurrentUserReactionAttribute($value)
     {
@@ -40,6 +40,13 @@ class Post extends Model
         }
 
         return null;
+    }
+
+    public function getCommentCountAttribute($value)
+    {
+        return DB::table('comments')
+                ->where('post_id', $this->id)
+                ->count();
     }
 
     public function creator()

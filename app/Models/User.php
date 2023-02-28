@@ -78,7 +78,7 @@ class User extends Authenticatable implements JWTSubject
     public function getIsFriendsAttribute($value)
     {
         $userId = null;
-        
+
         try{
             $payload = JWTAuth::parseToken()->getPayload();
             $userId = (int)$payload->get('id');
@@ -114,7 +114,8 @@ class User extends Authenticatable implements JWTSubject
             'firstName' => $this->firstName,
             'lastName' => $this->lastName,
             'email' => $this->email,
-            'birthday' => $this->birthday
+            'birthday' => $this->birthday,
+            'profile' => $this->profilePhoto(),
         ];
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ComentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EmojiController;
 use App\Http\Controllers\PostController;
@@ -40,6 +41,10 @@ Route::prefix('friend')->group(function(){
     Route::get('/userFriends/{id}/{take?}', [FriendController::class, 'userFriends']);
 });
 
+Route::prefix('comment')->group(function(){
+    Route::get('/postRelated/{id}/{commentId?}', [ComentController::class, 'postRelated']);
+});
+
 
 
 Route::group(['middleware' => ['jwt']], function () {
@@ -61,5 +66,11 @@ Route::group(['middleware' => ['jwt']], function () {
         Route::post('/markAsRead', [FriendController::class, 'markAsRead']);
         Route::get('/pending', [FriendController::class, 'pending']);
         Route::get('/searchCurrentUser', [FriendController::class, 'searchCurrentUser']);
+    });
+
+    Route::prefix('comment')->group(function(){
+        Route::post('/create', [ComentController::class, 'create']);
+        Route::post('/update', [ComentController::class, 'update']);
+        Route::post('/delete', [ComentController::class, 'delete']);
     });
 });
