@@ -29,12 +29,15 @@ class ComentController extends Controller
             [
                 'post_id',
                 'comment_id',
-                'body'
+                'user_id',
+                'body',
+
             ]
         );
 
         $validator = Validator::make($fields, [
             'post_id' => 'required',
+            'user_id' => 'required',
             'body' =>  'required',
         ]);
 
@@ -55,8 +58,12 @@ class ComentController extends Controller
         }
 
         $comment = Comment::create($fields);
+        $comment->load('user.profilePhoto.image');
 
-        return response()->json($comment);
+        return response()->json([
+            'data' => $comment,
+            'msg' => 'Commented successfully'
+        ]);
 
 
     }
@@ -80,7 +87,10 @@ class ComentController extends Controller
      */
     public function postRelated(int $id, ?int $commentId = null)
     {
-        $comments = Comment::where('post_id', $id);
+        $comments = Comment::with(
+                                'user.profilePhoto.image'
+                            )
+                           ->where('post_id', $id);
 
         if($commentId !== null){
             $comments->where('comment_id', $commentId);
