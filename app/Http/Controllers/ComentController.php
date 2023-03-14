@@ -90,24 +90,10 @@ class ComentController extends Controller
         $comments = Comment::with(
                                 'user.profilePhoto.image'
                             )
-                           ->where('post_id', $id);
-
-        if($commentId !== null){
-            $comments->where('comment_id', $commentId);
-        }
+                           ->where('post_id', $id)
+                           ->where('comment_id', $commentId);
 
         return response()->json($comments->paginate(6));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
     }
 
     /**
@@ -117,9 +103,38 @@ class ComentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update()
     {
-        //
+
+        $fields = request(
+            [
+                'body',
+                'id'
+            ]
+        );
+
+        $validator = Validator::make($fields, [
+            'body' =>  'required',
+            'id' => "required",
+        ]);
+
+
+        if($validator->fails())
+        {
+            return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
+
+        $comment = Comment::find(request()->id);
+
+        if($comment === null){
+            return response()->json('Comment not found', 404);
+        }
+
+        $comment->body = request()->body;
+        $comment->update();
+
+        return response()->json(['msg' => "Updated comment", 'data' => $comment]);
     }
 
     /**
@@ -128,8 +143,17 @@ class ComentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function delete()
     {
-        //
+        $id = request()->id;
+        $comment = Comment::find($id);
+
+        if($comment === null){
+         return response()->json('Comment not found', 404);
+        }
+
+        $comment->delete();
+
+        return response()->json(['msg' => 'Deleted comment', 'data' => $id]);
     }
 }

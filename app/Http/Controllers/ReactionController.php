@@ -87,4 +87,19 @@ class ReactionController extends Controller
         return $reaction;
 
     }
+
+    public function users(int $postId, int $id)
+    {
+        $reactions = Reaction::with('user.profilePhoto.img')
+                            ->where(function($q) use($postId, $id){
+                                $q->where('post_id', $postId);
+
+                                if($id != 0){
+                                    $q->where('reaction_id', $id);
+                                }
+                            });
+
+        return response()->json($reactions->paginate(6));
+
+    }
 }

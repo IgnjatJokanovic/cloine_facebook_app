@@ -57,6 +57,7 @@ Route::group(['middleware' => ['jwt']], function () {
 
     Route::prefix('reaction')->group(function(){
         Route::post('/create', [ReactionController::class, 'create']);
+        Route::get('/users/{postId}/{id}', [ReactionController::class, 'users']);
     });
 
     Route::prefix('friend')->group(function(){
