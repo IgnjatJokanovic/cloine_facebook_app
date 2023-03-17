@@ -90,7 +90,7 @@ class ReactionController extends Controller
 
     public function users(int $postId, int $id)
     {
-        $reactions = Reaction::with('user.profilePhoto.img')
+        $reactions = Reaction::with('user.profilePhoto.image')
                             ->where(function($q) use($postId, $id){
                                 $q->where('post_id', $postId);
 

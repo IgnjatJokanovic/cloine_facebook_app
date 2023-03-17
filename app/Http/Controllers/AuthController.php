@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Validator;
 
 class AuthController extends Controller
@@ -35,5 +37,19 @@ class AuthController extends Controller
         auth()->logout();
 
         return response()->json(['message' => 'Successfully logged out']);
+    }
+
+    public function refreshToken()
+    {
+        JWTAuth::parseToken()->refresh();
+
+        $user = JWTAuth::user();
+
+        $customClaims = $user->getJWTCustomClaims();
+
+        $newToken = JWTAuth::claims($customClaims)->fromUser($user);
+
+        return response()->json($newToken, 200);
+
     }
 }

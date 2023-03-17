@@ -74,4 +74,8 @@ Route::group(['middleware' => ['jwt']], function () {
         Route::post('/update', [ComentController::class, 'update']);
         Route::post('/delete', [ComentController::class, 'delete']);
     });
+
+    Route::prefix('auth')->group(function(){
+        Route::get('/refreshToken', [AuthController::class, 'refreshToken']);
+    });
 });

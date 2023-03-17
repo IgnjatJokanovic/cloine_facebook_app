@@ -80,7 +80,7 @@ class UserController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $user = User::with('profilePhoto', 'coverPhoto')
+        $user = User::with('profilePhoto.image', 'coverPhoto.image')
                     ->where('id', $id)
                     ->first();
         if($user === null){

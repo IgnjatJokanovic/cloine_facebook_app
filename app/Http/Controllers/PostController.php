@@ -6,6 +6,7 @@ use App\Events\FriendshipSent;
 use App\Models\Image;
 use App\Models\Post;
 use App\Models\Reaction;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +44,8 @@ class PostController extends Controller
                 'body',
                 'image',
                 'emotion',
-                'taged'
+                'taged',
+                'isProfile'
             ]
         );
 
@@ -74,13 +76,26 @@ class PostController extends Controller
         $fields['emotion_id'] = $emotion;
         $post = Post::create($fields);
         $taged = request()->taged;
-        Log::debug($post);
+
+        $msg = 'Post created';
+
         if($taged !== null){
             $ids = collect($taged)->pluck('id');
             $post->taged()->attach($ids);
         }
 
-        return response()->json(['msg' => 'Post created', 'id' => $post->id]);
+        if($fields['isProfile'] !== null){
+            $post->load('image');
+            $msg = 'Updated cover photo';
+
+            if($fields['isProfile']){
+                $msg = 'Updated profile photo';
+            }
+
+            self::updateUserImage($post->id, $fields['isProfile']);
+        }
+
+        return response()->json(['msg' => $msg, 'data' => $post]);
     }
 
     /**
@@ -98,8 +113,8 @@ class PostController extends Controller
     {
         $posts = Post::with(
                         [
-                            'owner',
-                            'creator',
+                            'owner.profilePhoto.image',
+                            'creator.profilePhoto.image',
                             'image',
                             'emotion',
                             'distinctReactions',
@@ -140,8 +155,8 @@ class PostController extends Controller
         // dd($id);
         $post = Post::with(
                     [
-                        'owner',
-                        'creator',
+                        'owner.profilePhoto.image',
+                        'creator.profilePhoto.image',
                         'image',
                         'emotion',
                         'distinctReactions',
@@ -251,7 +266,7 @@ class PostController extends Controller
         }
         $post->delete();
 
-        return response()->json('Post deleted', 200);
+        return response()->json(['msg' => 'Post deleted'], 200);
     }
 
     private static function uploadImage(array $fileArray): int|null
@@ -286,5 +301,20 @@ class PostController extends Controller
         \File::put($path, $image);
 
         return Image::create(['src' => "/img/$name"])->id;
+    }
+
+    private static function updateUserImage(int $id, bool $isProfile = false): void
+    {
+        $payload = JWTAuth::parseToken()->getPayload();
+        $idUser = $payload->get('id');
+        $user = User::find($idUser);
+
+        if($isProfile){
+            $user->profile = $id;
+        }else{
+            $user->cover = $id;
+        }
+
+        $user->update();
     }
 }
