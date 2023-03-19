@@ -75,6 +75,11 @@ Route::group(['middleware' => ['jwt']], function () {
         Route::post('/delete', [ComentController::class, 'delete']);
     });
 
+    Route::prefix('user')->group(function(){
+        Route::post('/search', [UserController::class, 'search']);
+        Route::get('/recomended', [UserController::class, 'recomended']);
+    });
+
     Route::prefix('auth')->group(function(){
         Route::get('/refreshToken', [AuthController::class, 'refreshToken']);
     });
