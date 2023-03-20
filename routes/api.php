@@ -67,6 +67,7 @@ Route::group(['middleware' => ['jwt']], function () {
         Route::post('/markAsRead', [FriendController::class, 'markAsRead']);
         Route::get('/pending', [FriendController::class, 'pending']);
         Route::get('/searchCurrentUser', [FriendController::class, 'searchCurrentUser']);
+        Route::get('/recomended', [FriendController::class, 'recomended']);
     });
 
     Route::prefix('comment')->group(function(){
@@ -77,7 +78,6 @@ Route::group(['middleware' => ['jwt']], function () {
 
     Route::prefix('user')->group(function(){
         Route::post('/search', [UserController::class, 'search']);
-        Route::get('/recomended', [UserController::class, 'recomended']);
     });
 
     Route::prefix('auth')->group(function(){

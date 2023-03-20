@@ -146,15 +146,15 @@ class FriendController extends Controller
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+
+    public function recomended()
     {
-        //
+        $payload = JWTAuth::parseToken()->getPayload();
+        $related = User::recomendedFriends($payload->get('id'))
+                            ->paginate(10);
+
+        return response()->json($related);
+
     }
 
     public function markAsRead()

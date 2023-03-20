@@ -193,4 +193,48 @@ class User extends Authenticatable implements JWTSubject
 
         return $query;
     }
+
+    public static function recomendedFriends(int $id)
+    {
+       $friendIds = DB::table('friends')
+                ->select(
+                    'users.id',
+                )
+                ->join('users', function ($join) use ($id) {
+                    $join->on(DB::raw('CASE friends.to WHEN '.$id.' THEN friends.from ELSE friends.to END'), '=', 'users.id');
+                })
+                ->where('friends.accepted', true)
+                ->where(function($q) use($id){
+                    $q->where('friends.to', $id)
+                    ->orWhere('friends.from', $id);
+                }
+                )->get()
+                ->pluck('id')
+                ->toArray();
+
+        Log::debug($friendIds);
+        $friendsOfFriends = DB::table('friends')
+                            ->select(
+                                'users.id',
+                                'users.firstName',
+                                'users.lastName',
+                                'i1.src as profile',
+                            )
+                            ->join('users', function ($join) use ($friendIds) {
+                                $join->on(DB::raw('CASE WHEN (friends.to IN ('.implode(',', $friendIds).')) THEN friends.from ELSE friends.to END'), '=', 'users.id');
+                            })
+                            ->leftJoin('posts as p1', 'users.profile', '=', 'p1.id')
+                            ->leftJoin('images as i1', 'p1.image_id', '=', 'i1.id')
+                            ->where('friends.accepted', true)
+                            ->where(function($q) use($friendIds){
+                                $q->whereIn('friends.to', $friendIds)
+                                ->orWhereIn('friends.from', $friendIds);
+                            })
+                            ->where(function($q) use($id){
+                                $q->whereNot('friends.to', $id)
+                                ->whereNot('friends.from', $id);
+                            });
+
+        return $friendsOfFriends;
+    }
 }
