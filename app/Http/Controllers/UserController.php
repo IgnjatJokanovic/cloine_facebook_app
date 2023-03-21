@@ -124,4 +124,45 @@ class UserController extends Controller
     {
         //
     }
+
+    public function updatePhoto()
+    {
+        $fields = request()->all();
+
+        $validator = Validator::make($fields, [
+            'id' => 'required',
+            'isProfile' =>  'required',
+        ]);
+
+        if($validator->fails())
+        {
+            return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
+        $payload = JWTAuth::parseToken()->getPayload();
+        $userId = $payload->get('id');
+
+
+        $user = User::find($userId);
+
+        if($user === null){
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        $message = 'Changed profile photo';
+
+        $postId = request()->id;
+
+        if(request()->isProfile){
+            $user->profile = $postId;
+        }else{
+            $user->cover = $postId;
+            $message = 'Changed cover photo';
+        }
+
+        $user->update();
+
+        return response()->json(['msg' => $message]);
+
+    }
 }

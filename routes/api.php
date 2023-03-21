@@ -78,6 +78,7 @@ Route::group(['middleware' => ['jwt']], function () {
 
     Route::prefix('user')->group(function(){
         Route::post('/search', [UserController::class, 'search']);
+        Route::post('/updatePhoto', [UserController::class, 'updatePhoto']);
     });
 
     Route::prefix('auth')->group(function(){

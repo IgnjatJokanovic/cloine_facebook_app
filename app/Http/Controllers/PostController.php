@@ -23,8 +23,29 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with('distinctReactions')
+        $payload = JWTAuth::parseToken()->getPayload();
+        $id = $payload->get('id');
+
+        $friendIds = User::friendIds($id);
+
+        array_push($friendIds, $id);
+
+        $posts = Post::with(
+                        [
+                            'owner.profilePhoto.image',
+                            'creator.profilePhoto.image',
+                            'image',
+                            'emotion',
+                            'distinctReactions',
+                            'taged',
+                        ]
+                    )
                     ->withCount('distinctReactions')
+                    ->where(function($q) use($friendIds){
+                        $q->whereIn('owner', $friendIds)
+                            ->orWHereIn('creator', $friendIds);
+                    })
+                    ->orderBy('created_at', 'DESC')
                     ->paginate(10);
 
         return response()->json($posts);

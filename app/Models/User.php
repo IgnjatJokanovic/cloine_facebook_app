@@ -196,23 +196,8 @@ class User extends Authenticatable implements JWTSubject
 
     public static function recomendedFriends(int $id)
     {
-       $friendIds = DB::table('friends')
-                ->select(
-                    'users.id',
-                )
-                ->join('users', function ($join) use ($id) {
-                    $join->on(DB::raw('CASE friends.to WHEN '.$id.' THEN friends.from ELSE friends.to END'), '=', 'users.id');
-                })
-                ->where('friends.accepted', true)
-                ->where(function($q) use($id){
-                    $q->where('friends.to', $id)
-                    ->orWhere('friends.from', $id);
-                }
-                )->get()
-                ->pluck('id')
-                ->toArray();
+        $friendIds = self::friendIds($id);
 
-        Log::debug($friendIds);
         $friendsOfFriends = DB::table('friends')
                             ->select(
                                 'users.id',
@@ -236,5 +221,25 @@ class User extends Authenticatable implements JWTSubject
                             });
 
         return $friendsOfFriends;
+    }
+
+    public static function friendIds(int $id)
+    {
+        return DB::table('friends')
+                ->select(
+                    'users.id',
+                )
+                ->join('users', function ($join) use ($id) {
+                    $join->on(DB::raw('CASE friends.to WHEN '.$id.' THEN friends.from ELSE friends.to END'), '=', 'users.id');
+                })
+                ->where('friends.accepted', true)
+                ->where(function($q) use($id){
+                    $q->where('friends.to', $id)
+                    ->orWhere('friends.from', $id);
+                }
+                )->get()
+                ->pluck('id')
+                ->toArray();
+
     }
 }
