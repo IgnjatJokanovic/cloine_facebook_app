@@ -38,4 +38,34 @@ class Message extends Model
                     'images.src AS profile'
                 );
     }
+
+    public static function search(int $id, string $param)
+    {
+        return DB::table('messages')
+                    ->join('users', function ($join) use ($id) {
+                        $join->on(DB::raw('CASE messages.to WHEN '.$id.' THEN messages.from ELSE messages.to END'), '=', 'users.id');
+                    })
+                    ->leftJoin('posts', 'users.profile', '=', 'posts.id')
+                    ->leftJoin('images', 'posts.image_id', '=', 'images.id')
+                    ->where(function($q) use ($id){
+                        $q->where('messages.from', $id)
+                            ->orWhere('messages.to', $id);
+                    })
+                    ->where(function($q) use($param){
+                        $q->where('messages.body', 'ILIKE', "%$param%")
+                            ->orWhere('users.firstName', 'ILIKE', "%$param%")
+                            ->orWhere('users.lastName', "ILIKE", "%$param%");
+                    })
+                    ->orderBy('messages.created_at', 'DESC')
+                    ->select(
+                        'users.id',
+                        'users.firstName',
+                        'users.lastName',
+                        'images.src AS profile',
+                        'messages.from',
+                        'messages.to',
+                        'messages.body',
+                        'messages.created_at',
+                    );
+    }
 }

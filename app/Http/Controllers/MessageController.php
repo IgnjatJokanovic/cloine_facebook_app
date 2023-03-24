@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Message;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -30,15 +31,19 @@ class MessageController extends Controller
         //
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function search()
     {
-        //
+        $search = request()->search;
+
+        $payload = JWTAuth::parseToken()->getPayload();
+        $userId = (int)$payload->get('id');
+
+        $data = Message::search($userId, $search)
+                        ->union(User::friendsQuerry($userId, $search))
+                        ->paginate(6);
+
+        return response()->json($data);
+
     }
 
     /**

@@ -92,5 +92,6 @@ Route::group(['middleware' => ['jwt']], function () {
         Route::post('/create', [MessageController::class, 'create']);
         Route::post('/update', [MessageController::class, 'update']);
         Route::post('/delete', [MessageController::class, 'delete']);
+        Route::post('/search', [MessageController::class, 'search']);
     });
 });

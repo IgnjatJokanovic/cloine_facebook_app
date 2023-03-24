@@ -168,6 +168,10 @@ class User extends Authenticatable implements JWTSubject
                     'users.firstName',
                     'users.lastName',
                     'i1.src as profile',
+                    'friends.from',
+                    'friends.to',
+                    DB::raw('null as body'),
+                    'friends.created_at',
                 )
                 ->join('users', function ($join) use ($id) {
                     $join->on(DB::raw('CASE friends.to WHEN '.$id.' THEN friends.from ELSE friends.to END'), '=', 'users.id');
@@ -190,6 +194,8 @@ class User extends Authenticatable implements JWTSubject
         if($excluded){
             $query->where('users.id', $excluded);
         }
+
+        Log::debug($query->get());
 
         return $query;
     }
