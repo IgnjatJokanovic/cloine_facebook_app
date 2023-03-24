@@ -7,7 +7,9 @@ use App\Http\Controllers\EmojiController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\FriendController;
+use App\Http\Controllers\MessageController;
 use Illuminate\Support\Facades\Route;
+use Symfony\Component\Translation\MessageCatalogue;
 
 /*
 |--------------------------------------------------------------------------
@@ -83,5 +85,12 @@ Route::group(['middleware' => ['jwt']], function () {
 
     Route::prefix('auth')->group(function(){
         Route::get('/refreshToken', [AuthController::class, 'refreshToken']);
+    });
+
+    Route::prefix('message')->group(function(){
+        Route::get('/', [MessageController::class, 'index']);
+        Route::post('/create', [MessageController::class, 'create']);
+        Route::post('/update', [MessageController::class, 'update']);
+        Route::post('/delete', [MessageController::class, 'delete']);
     });
 });
