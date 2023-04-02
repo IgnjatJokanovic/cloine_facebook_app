@@ -10,6 +10,12 @@ class Message extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'body',
+        'from',
+        'to',
+    ];
+
     public static function latestMessages(int $userId)
     {
         return DB::table('messages AS m1')
@@ -29,13 +35,16 @@ class Message extends Model
                 ->leftJoin('images', 'posts.image_id', '=', 'images.id')
                 ->orderBy('m1.created_at', 'DESC')
                 ->select(
+                    'users.id',
+                    'users.firstName',
+                    'users.lastName',
+                    'images.src AS profile',
+                    'm1.id as messageId',
                     'm1.from',
                     'm1.to',
                     'm1.body',
                     'm1.created_at',
-                    'users.firstName',
-                    'users.lastName',
-                    'images.src AS profile'
+                    DB::raw("(CASE WHEN (SELECT COUNT(*) FROM messages m3 WHERE m3.from = m1.from AND m3.to = m1.to AND opened = false) > 0 THEN 0 ELSE 1 END) AS opened")
                 );
     }
 
@@ -66,6 +75,7 @@ class Message extends Model
                         'messages.to',
                         'messages.body',
                         'messages.created_at',
+                        'messages.opened',
                     );
     }
 }

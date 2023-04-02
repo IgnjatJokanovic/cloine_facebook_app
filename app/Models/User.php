@@ -172,6 +172,7 @@ class User extends Authenticatable implements JWTSubject
                     'friends.to',
                     DB::raw('null as body'),
                     'friends.created_at',
+                    'friends.opened',
                 )
                 ->join('users', function ($join) use ($id) {
                     $join->on(DB::raw('CASE friends.to WHEN '.$id.' THEN friends.from ELSE friends.to END'), '=', 'users.id');
@@ -204,6 +205,10 @@ class User extends Authenticatable implements JWTSubject
     {
         $friendIds = self::friendIds($id);
 
+        if (empty($friendIds)) {
+            return DB::table('users')->where('id', -1);
+        }
+
         $friendsOfFriends = DB::table('friends')
                             ->select(
                                 'users.id',
@@ -229,23 +234,23 @@ class User extends Authenticatable implements JWTSubject
         return $friendsOfFriends;
     }
 
-    public static function friendIds(int $id)
+    public static function friendIds(int $id): array
     {
         return DB::table('friends')
-                ->select(
-                    'users.id',
-                )
-                ->join('users', function ($join) use ($id) {
-                    $join->on(DB::raw('CASE friends.to WHEN '.$id.' THEN friends.from ELSE friends.to END'), '=', 'users.id');
-                })
-                ->where('friends.accepted', true)
-                ->where(function($q) use($id){
-                    $q->where('friends.to', $id)
-                    ->orWhere('friends.from', $id);
-                }
-                )->get()
-                ->pluck('id')
-                ->toArray();
+                    ->select(
+                        'users.id',
+                    )
+                    ->join('users', function ($join) use ($id) {
+                        $join->on(DB::raw('CASE friends.to WHEN '.$id.' THEN friends.from ELSE friends.to END'), '=', 'users.id');
+                    })
+                    ->where('friends.accepted', true)
+                    ->where(function($q) use($id){
+                        $q->where('friends.to', $id)
+                        ->orWhere('friends.from', $id);
+                    })
+                    ->get()
+                    ->pluck('id')
+                    ->toArray();
 
     }
 }

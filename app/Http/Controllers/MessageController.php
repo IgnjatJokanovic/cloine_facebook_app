@@ -6,6 +6,7 @@ use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Validator;
 
 class MessageController extends Controller
 {
@@ -21,6 +22,25 @@ class MessageController extends Controller
         return response()->json($latest);
     }
 
+    public function show(int $id)
+    {
+        $payload = JWTAuth::parseToken()->getPayload();
+        $userId = (int)$payload->get('id');
+
+        $messages = Message::where(function($q) use($id, $userId){
+                        $q->where('from', $id)
+                            ->where('to', $userId);
+                    })
+                    ->orWhere(function($q) use($id, $userId){
+                        $q->where('to', $id)
+                            ->where('from', $userId);
+                    })
+                    ->orderBy('created_at', 'ASC')
+                    ->paginate(10);
+
+        return response()->json($messages);
+    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -28,7 +48,32 @@ class MessageController extends Controller
      */
     public function create()
     {
-        //
+        $payload = JWTAuth::parseToken()->getPayload();
+        $userId = (int)$payload->get('id');
+
+        $fields = request(
+            [
+                'to',
+                'body',
+            ]
+        );
+
+        $validator = Validator::make($fields, [
+            'to' => 'required',
+            'body' => 'required',
+        ]);
+
+        $fields['from'] = $userId;
+
+
+        if($validator->fails())
+        {
+            return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
+        $message = Message::create($fields);
+
+        return response()->json(['msg' => 'Sent message', 'data' => $message]);
     }
 
     public function search()
@@ -46,32 +91,85 @@ class MessageController extends Controller
 
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
+    public function markAsRead()
     {
-        //
+        $fields = request(
+            [
+                'ids',
+            ]
+        );
+
+        $validator = Validator::make($fields, [
+            'ids' => 'required|array',
+        ]);
+
+
+        if($validator->fails())
+        {
+            return response()->json(['error' => $validator->errors()->first()], 422);
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update()
     {
-        //
+
+        $fields = request(
+            [
+                'body',
+                'id',
+            ]
+        );
+
+        $validator = Validator::make($fields, [
+            'body' => 'required',
+            'id' => 'required',
+        ]);
+
+
+        if($validator->fails())
+        {
+            return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
+        $message = Message::find($fields['id']);
+
+        if($message === null){
+            return response()->json(['error' => 'Message not found'], 404);
+        }
+
+        $message->body = $fields['body'];
+        $message->update();
+
+        return response()->json(['msg' => 'Updated message', 'data' => $message]);
     }
 
 
     public function delete()
     {
-        //
+        $fields = request(
+            [
+                'id',
+            ]
+        );
+
+        $validator = Validator::make($fields, [
+            'id' => 'required',
+        ]);
+
+
+        if($validator->fails())
+        {
+            return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
+        $message = Message::find($fields['id']);
+
+        if($message === null){
+            return response()->json(['error' => 'Message not found'], 404);
+        }
+
+        $message->delete();
+
+        return response()->json(['msg' => 'Deleted message']);
     }
 }

@@ -6,6 +6,8 @@ namespace Database\Seeders;
 
 use App\Models\Emoji;
 use Illuminate\Database\Seeder;
+use App\Models\User;
+use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
@@ -22,6 +24,80 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
+
+        $birthday = Carbon::now()->subDays(3);
+
+        // has all friends 2-7
+        $user1 = User::create([
+            'firstName' => 'Johny',
+            'lastName' =>  'Cage',
+            'birthday' =>  $birthday,
+            'email' => 'email1@gmail.com',
+            'password' => bcrypt('email1'),
+        ]);
+
+        // has friend 3
+        $user2 = User::create([
+            'firstName' => 'Shao',
+            'lastName' =>  'Kahn',
+            'birthday' =>  $birthday,
+            'email' => 'email2@gmail.com',
+            'password' => bcrypt('email1'),
+        ]);
+
+        $user3 = User::create([
+            'firstName' => 'Liu',
+            'lastName' =>  'Kang',
+            'birthday' =>  $birthday,
+            'email' => 'email3@gmail.com',
+            'password' => bcrypt('email1'),
+        ]);
+
+
+        $user4 = User::create([
+            'firstName' => 'Sub',
+            'lastName' =>  'Zero',
+            'birthday' =>  $birthday,
+            'email' => 'email4@gmail.com',
+            'password' => bcrypt('email1'),
+        ]);
+
+        $user5 = User::create([
+            'firstName' => 'Freddy',
+            'lastName' =>  'Cruger',
+            'birthday' =>  $birthday,
+            'email' => 'email5@gmail.com',
+            'password' => bcrypt('email1'),
+        ]);
+
+        $user6 = User::create([
+            'firstName' => 'Miki',
+            'lastName' =>  'Maus',
+            'birthday' =>  $birthday,
+            'email' => 'email6@gmail.com',
+            'password' => bcrypt('email1'),
+        ]);
+
+        $user7 = User::create([
+            'firstName' => 'Pera',
+            'lastName' =>  'Zdera',
+            'birthday' =>  $birthday,
+            'email' => 'email7@gmail.com',
+            'password' => bcrypt('email1'),
+        ]);
+
+        $user1->friendsFrom()->attach([
+            $user2->id,
+            $user3->id,
+            $user4->id,
+            $user5->id,
+            $user6->id,
+            $user7->id,
+        ], ['accepted' => true]);
+
+        $user2->friendsFrom()->attach([
+            $user3->id,
+        ], ['accepted' => true]);
 
         Emoji::create(["code" => "&#x1f600;"]);
         Emoji::create(["code" => "&#x1f603;"]);

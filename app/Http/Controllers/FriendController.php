@@ -25,7 +25,7 @@ class FriendController extends Controller
 
         $user = User::find($id);
 
-        $pending = $user->pending()->paginate(5);
+        $pending = $user->pending()?->paginate(5);
 
         return response()->json($pending);
     }

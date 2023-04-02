@@ -70,6 +70,7 @@ Route::group(['middleware' => ['jwt']], function () {
         Route::get('/pending', [FriendController::class, 'pending']);
         Route::get('/searchCurrentUser', [FriendController::class, 'searchCurrentUser']);
         Route::get('/recomended', [FriendController::class, 'recomended']);
+        Route::get('/unreadCount', [FriendController::class, 'unreadCount']);
     });
 
     Route::prefix('comment')->group(function(){
@@ -89,9 +90,12 @@ Route::group(['middleware' => ['jwt']], function () {
 
     Route::prefix('message')->group(function(){
         Route::get('/', [MessageController::class, 'index']);
+        Route::get('/show/{id}', [MessageController::class, 'show']);
         Route::post('/create', [MessageController::class, 'create']);
         Route::post('/update', [MessageController::class, 'update']);
         Route::post('/delete', [MessageController::class, 'delete']);
         Route::post('/search', [MessageController::class, 'search']);
+        Route::post('/markAsRead', [MessageController::class, 'markAsRead']);
+        Route::get('/unreadCount', [MessageController::class, 'unreadCount']);
     });
 });

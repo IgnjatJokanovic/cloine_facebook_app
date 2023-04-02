@@ -105,7 +105,9 @@ class PostController extends Controller
             $post->taged()->attach($ids);
         }
 
-        if($fields['isProfile'] !== null){
+        $isProfile = $fields['isProfile'] ?? null;
+
+        if($isProfile !== null){
             $post->load('image');
             $msg = 'Updated cover photo';
 
