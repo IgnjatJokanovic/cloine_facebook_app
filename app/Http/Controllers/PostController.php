@@ -74,12 +74,12 @@ class PostController extends Controller
             'owner' => 'required',
             'creator' => 'required',
             'body' =>  'required_without_all:image,emotion,taged',
-            'image' => 'required_without_all:body,emotion,taged',
+            'image.src' => 'required_without_all:body,emotion,taged',
             'emotion' => 'required_without_all:body,image,taged',
             'taged' => 'required_without_all:body,emotion,image',
         ], [
             'body.required_without_all' => 'Cant make empty post, fill something',
-            'image.required_without_all' => 'Cant make empty post, fill something',
+            'image.src.required_without_all' => 'Cant make empty post, fill something',
             'emotion.required_without_all' => 'Cant make empty post, fill something',
             'taged.required_without_all' => 'Cant make empty post, fill something',
         ]);
@@ -229,12 +229,12 @@ class PostController extends Controller
         $validator = Validator::make($fields, [
             'id' => 'required',
             'body' =>  'required_without_all:image,emotion,taged',
-            'image' => 'required_without_all:body,emotion,taged',
+            'image.src' => 'required_without_all:body,emotion,taged',
             'emotion' => 'required_without_all:body,image,taged',
             'taged' => 'required_without_all:body,emotion,image',
         ], [
             'body.required_without_all' => 'Cant make empty post, fill something',
-            'image.required_without_all' => 'Cant make empty post, fill something',
+            'image.src.required_without_all' => 'Cant make empty post, fill something',
             'emotion.required_without_all' => 'Cant make empty post, fill something',
             'taged.required_without_all' => 'Cant make empty post, fill something',
         ]);

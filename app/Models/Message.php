@@ -20,7 +20,7 @@ class Message extends Model
     {
         return DB::table('messages AS m1')
                 ->leftjoin('messages AS m2', function($join) {
-                    $join->on('m1.from', '=', 'm2.to');
+                    $join->on('m1.from', '=', 'm2.from');
                     $join->on('m1.id', '<', 'm2.id');
                 })
                 ->whereNull('m2.id')

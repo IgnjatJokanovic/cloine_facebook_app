@@ -85,6 +85,7 @@ class MessageController extends Controller
 
         $data = Message::search($userId, $search)
                         ->union(User::friendsQuerry($userId, $search))
+                        ->orderBy('id')
                         ->paginate(6);
 
         return response()->json($data);

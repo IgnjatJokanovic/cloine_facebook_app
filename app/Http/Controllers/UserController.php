@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Validator;
 
+use function App\Providers\sendActivationEmail;
+
 class UserController extends Controller
 {
     /**
@@ -54,7 +56,9 @@ class UserController extends Controller
         $fields['password'] = $password;
 
 
-        User::create($fields);
+        $user = User::create($fields);
+
+        sendActivationEmail($user->email, $user->id);
 
         return response()->json("Thank you for registering, activation link has been sent to your email", 201);
 
@@ -83,6 +87,7 @@ class UserController extends Controller
         $user = User::with('profilePhoto.image', 'coverPhoto.image')
                     ->where('id', $id)
                     ->first();
+
         if($user === null){
             return response()->json('User not found', 404);
         }
@@ -109,9 +114,49 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update()
     {
-        //
+        $payload = JWTAuth::parseToken()->getPayload();
+        $id = $payload->get('id');
+
+        $fields = request()->all();
+
+        $validator = Validator::make($fields, [
+            'firstName' => 'required|string|max:255',
+            'lastName' =>  'required|string|max:255',
+            'birthday' =>  'required|date',
+            'email' => "required|email|unique:users,email,$id",
+        ]);
+
+        if($validator->fails())
+        {
+            return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
+        $message = 'Updated data';
+
+        $birthday = Carbon::parse($fields['birthday']);
+
+        $user = User::find($id);
+
+        $reload = false;
+
+        if($fields['email'] !== $user->email){
+
+            $message = 'Email activation sent to new email please login again';
+            $user->active = false;
+            sendActivationEmail($user->email, $user->id);
+            $reload = true;
+        }
+
+        $user->firstName = $fields['firstName'];
+        $user->lastName = $fields['lastName'];
+        $user->email = $fields['email'];
+        $user->birthday = $birthday;
+
+        $user->update();
+
+        return response()->json(['msg' => $message, 'data' => $reload]);
     }
 
     /**
