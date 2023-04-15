@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Validator;
 
+use function App\Providers\sendPasswordResetEmail;
+
 class PasswordController extends Controller
 {
 
@@ -40,16 +42,7 @@ class PasswordController extends Controller
             return response()->json(['error' => 'User not found with that email'], 404);
         }
 
-        $token = md5($user->email . "facebook");
-
-        PasswordResetToken::create([
-            'token' => $token,
-            'user_id' => $user->id,
-        ]);
-
-        $url = env("PASSWORD_RESET_URL") . "?token=$token";
-
-        Mail::to($user->email)->queue(new PasswordResetMail($url));
+        sendPasswordResetEmail($user->email, $user->id);
 
         return response()->json('Password reset email sent check your inbox');
     }

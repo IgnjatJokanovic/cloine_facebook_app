@@ -3,27 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Dto\FriendRequestDto;
-use App\Events\FrieendRequestSent;
 use App\Models\Friend;
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Validator;
 
+use function App\Providers\notifyFriendRequestSent;
+use function App\Providers\notifyNotificationRecieved;
+
 class FriendController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function pending()
     {
-        $payload = JWTAuth::parseToken()->getPayload();
-        $id = $payload->get('id');
-
-        $user = User::find($id);
+        /** @var User $user */
+        $user = auth()->user();
 
         $pending = $user->pending()?->paginate(5);
 
@@ -41,14 +37,28 @@ class FriendController extends Controller
         return response()->json($friends->paginate(6));
     }
 
+    public function unreadCount()
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        $count = $user->pending()->where('opened', false)->count();
+
+        return response()->json($count);
+    }
 
 
+    public function markAllAsRead()
+    {
+        /** @var User $user */
+        $user = auth()->user();
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+        Friend::where('to', $user->id)
+            ->update(['opened' => true]);
+
+        return response()->json(['msg' => 'Marked all as read']);
+    }
+
     public function create()
     {
         $fields = request(['to']);
@@ -68,39 +78,26 @@ class FriendController extends Controller
             return response()->json("User not found", 404);
         }
 
-        $payload = JWTAuth::parseToken()->getPayload();
-        $fields['from'] = $payload->get('id');
+        /** @var User $user */
+        $user = auth()->user();
 
-        $user = User::with('profilePhoto', 'profilePhoto.image')
-                    ->where('id', $fields['from'])
-                    ->first();
-        $userDto = new FriendRequestDto(
-            $user->id,
-            $fields['to'],
-            $user->firstName,
-            $user->lastName,
-            $user->profile_photo,
-            false,
-            false,
-        );
-
-        broadcast(new FrieendRequestSent($userDto));
+        $fields['from'] = $user->id;
 
         $rel = Friend::create($fields);
 
         return response()->json(['msg' => "Friend request sent", 'data' => $rel], 200);
-
-
     }
 
 
     public function searchCurrentUser()
     {
+        /** @var User $user */
+        $user = auth()->user();
+
         $search = request()->search;
         $exlude = request()->exlude;
-        Log::debug(request()->all());
-        $payload = JWTAuth::parseToken()->getPayload();
-        $userId = (int)$payload->get('id');
+
+        $userId = $user->id;
 
         $friends =  User::friendsQuerry($userId, $search);
 
@@ -110,40 +107,6 @@ class FriendController extends Controller
         }
 
         return response()->json($friends->paginate(6));
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
     }
 
 
@@ -159,21 +122,32 @@ class FriendController extends Controller
 
     public function markAsRead()
     {
+        /** @var User $user */
+        $user = auth()->user();
+
         $id = request()->id;
-        $payload = JWTAuth::parseToken()->getPayload();
-        $userId = $payload->get('id');
 
-        $this->updatePivot($id, $userId, 'opened', true);
+        $user->friendsFrom()->updateExistingPivot($id, ['opened' => true]);
 
-        return response()->json('Declined friend request', 201);
+        return response()->json(['msg' => '']);
     }
 
     public function accept()
     {
         $id = request()->id;
+
+        /** @var User $user */
         $user = auth()->user();
-        Log::debug('accepting');
         $user->friendsFrom()->updateExistingPivot($id, ['accepted' => true]);
+
+
+        Notification::create([
+            'body' => 'Accepted your friend request',
+            'user_id' => $id,
+            'creator' => $user->id,
+            'type' => 'friendship',
+        ]);
+
 
         return response()->json('Accepted friend request', 201);
     }
@@ -181,41 +155,25 @@ class FriendController extends Controller
     public function decline()
     {
         $id = request()->id;
-        $payload = JWTAuth::parseToken()->getPayload();
-        $userId = $payload->get('id');
-        Log::debug('accepting');
-        $friend = Friend::where(function ($q) use ($id, $userId){
-            $q->where('to', $id)
-            ->orWhere('from', $userId);
-        })
-        ->orWhere(function($q) use ($id, $userId){
-            $q->where('to', $userId)
-            ->orWhere('from', $id);
-        })->first();
+        /** @var User $user */
+        $user = auth()->user();
 
-        $friend->delete();
-
-        return response()->json('', 201);
-    }
-
-
-
-    private function updatePivot($id, $userId, $property, $value)
-    {
-        $friend = Friend::where(function ($q) use ($id, $userId){
+        $friendRequest = Friend::where(function ($q) use ($id, $user){
                 $q->where('to', $id)
-                ->orWhere('from', $userId);
+                ->where('from', $user->id);
             })
-            ->orWhere(function($q) use ($id, $userId){
-                $q->where('to', $userId)
-                ->orWhere('from', $id);
-            })->first();
+            ->orWhere(function($q) use ($id, $user){
+                $q->where('to', $user->id)
+                ->where('from', $id);
+            })
+            ->first();
 
-            if($friend === null){
-                return response()->json('User not found', 404);
-            }
+        if($friendRequest === null){
+            return response()->json(['error' => 'Friend request nor found']);
+        }
 
-            $friend->{$property} = $value;
-            $friend->update();
+        $friendRequest->delete();
+
+        return response()->json('Declined friend request', 201);
     }
 }

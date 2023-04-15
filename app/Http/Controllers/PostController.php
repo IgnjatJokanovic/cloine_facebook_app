@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\FriendshipSent;
 use App\Models\Image;
+use App\Models\Notification;
 use App\Models\Post;
 use App\Models\Reaction;
 use App\Models\User;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Validator;
+
+use function App\Providers\notifyNotificationRecieved;
 
 class PostController extends Controller
 {
@@ -103,6 +106,27 @@ class PostController extends Controller
         if($taged !== null){
             $ids = collect($taged)->pluck('id');
             $post->taged()->attach($ids);
+
+            foreach($ids as $id){
+
+                notifyNotificationRecieved(
+                    'Has tagged you in a post',
+                    $id,
+                    $fields['creator'],
+                    $post->id
+                );
+
+            }
+        }
+
+        if($fields['owner'] !== $fields['creator']){
+
+            notifyNotificationRecieved(
+                'Wrote something on your wall',
+                $fields['owner'],
+                $fields['creator'],
+                $post->id
+            );
         }
 
         $isProfile = $fields['isProfile'] ?? null;
@@ -196,24 +220,6 @@ class PostController extends Controller
         return response()->json($post);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update()
     {
         $fields = request(
@@ -249,6 +255,35 @@ class PostController extends Controller
 
         if($post === null){
             return response()->json(['error' => 'Post not found'], 404);
+        }
+
+        $taged = request()->taged;
+
+        if($taged !== null){
+            $ids = collect($taged)->pluck('id');
+            $old = $post->taged()->pluck('user_id')->toArray();
+            $post->taged()->sync($ids);
+
+            $remove = array_diff($old, $ids);;
+
+            foreach($ids as $id){
+                if(!in_array($id, $old)){
+
+                    notifyNotificationRecieved(
+                        'Has tagged you in a post',
+                        $id,
+                        $fields['creator'],
+                        $post->id
+                    );
+                }
+
+            }
+
+            if(!empty($remove)){
+                Notification::where('post_id', $post->id)
+                            ->whereIn('user_id', $remove)
+                            ->delete();
+            }
         }
 
         $image = self::uploadImage($fields['image']);

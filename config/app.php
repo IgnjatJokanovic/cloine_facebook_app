@@ -182,6 +182,7 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         App\Providers\SendMailServiceProvider::class,
+        App\Providers\NotifyServiceProvider::class,
 
         /*
          * Package Service Providers...

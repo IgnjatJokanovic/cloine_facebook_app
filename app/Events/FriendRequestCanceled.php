@@ -11,17 +11,18 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class FrieendRequestSent implements ShouldBroadcastNow
+class FriendRequestCanceled implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    /**
+       /**
      * Create a new event instance.
      *
      * @return void
      */
     public function __construct(
-        public $user
+        public int $to,
+        public int $id,
     )
     {
         //
@@ -31,13 +32,13 @@ class FrieendRequestSent implements ShouldBroadcastNow
     {
         // This must always be an array. Since it will be parsed with json_encode()
         return [
-            'user' => $this->user
+            'id' => $this->id
         ];
     }
 
     public function broadcastAs(): string
     {
-        return 'recieved';
+        return 'canceled';
     }
 
     /**
@@ -47,6 +48,6 @@ class FrieendRequestSent implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('friendRequestSent.'.$this->user->to);
+        return new Channel('friendRequestCanceled.'.$this->to);
     }
 }

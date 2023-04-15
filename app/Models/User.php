@@ -30,6 +30,7 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         'birthday',
+        'active',
     ];
 
     /**
@@ -83,6 +84,7 @@ class User extends Authenticatable implements JWTSubject
             $payload = JWTAuth::parseToken()->getPayload();
             $userId = (int)$payload->get('id');
         }catch(Exception $e){
+            return null;
         }
 
         $isFriends = null;
@@ -158,7 +160,7 @@ class User extends Authenticatable implements JWTSubject
         return $this->friendsFrom()
                     ->with('profilePhoto.image')
                     ->where('friends.accepted', false)
-                    ->orderBy('friends.opened', 'desc');
+                    ->orderBy('friends.opened', 'ASC');
     }
 
     public static function friendsQuerry(int $id, ?string $search = null, ?int $excluded = null)

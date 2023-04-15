@@ -3,8 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comment;
+use App\Models\Notification;
+use App\Models\Post;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Validator;
+
+use function App\Providers\notifyNotificationRecieved;
 
 class ComentController extends Controller
 {
@@ -29,7 +34,6 @@ class ComentController extends Controller
             [
                 'post_id',
                 'comment_id',
-                'user_id',
                 'body',
 
             ]
@@ -37,7 +41,6 @@ class ComentController extends Controller
 
         $validator = Validator::make($fields, [
             'post_id' => 'required',
-            'user_id' => 'required',
             'body' =>  'required',
         ]);
 
@@ -46,6 +49,17 @@ class ComentController extends Controller
         {
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
+
+        $post = Post::find($fields['post_id']);
+
+        if($post === null){
+            return response()->json(['error' => 'Post not found'], 404);
+        }
+
+        $payload = JWTAuth::parseToken()->getPayload();
+        $userId = $payload->get('id');
+
+        $fields['user_id'] = $userId;
 
         $existingComment = null;
 
@@ -59,6 +73,42 @@ class ComentController extends Controller
 
         $comment = Comment::create($fields);
         $comment->load('user.profilePhoto.image');
+
+        if($post->owner !== $post->creator){
+            if($post->owner !== $userId){
+
+                notifyNotificationRecieved(
+                    'Commented on you post',
+                    $post->owner,
+                    $userId,
+                    $post->id,
+                    'comment',
+                );
+            }
+
+            if($post->creator !== $userId){
+
+                notifyNotificationRecieved(
+                    'Commented on you post',
+                    $post->creator,
+                    $userId,
+                    $post->id,
+                    'comment',
+                );
+            }
+
+        }else{
+            if($post->owner !== $userId){
+
+                notifyNotificationRecieved(
+                    'Commented on you post',
+                    $post->owner,
+                    $userId,
+                    $post->id,
+                    'comment',
+                );
+            }
+        }
 
         return response()->json([
             'data' => $comment,
@@ -148,9 +198,18 @@ class ComentController extends Controller
         $id = request()->id;
         $comment = Comment::find($id);
 
+        $payload = JWTAuth::parseToken()->getPayload();
+        $userId = $payload->get('id');
+
+
         if($comment === null){
          return response()->json('Comment not found', 404);
         }
+
+        Notification::where('post_id', $comment->post_id)
+            ->where('creator', $userId)
+            ->where('type', 'comment')
+            ->delete();
 
         $comment->delete();
 

@@ -23,6 +23,14 @@ Broadcast::channel('friendRequestSent.{id}', function($user, $id) {
     return (int) $user->to === (int) $id;
 });
 
+Broadcast::channel('friendRequestCanceled.{id}', function($user, $id) {
+    return (int) $user->to === (int) $id;
+});
+
 Broadcast::channel('postReaction.{id}', function($reaction, $id) {
     return (int) $reaction->post_id === (int) $id;
+});
+
+Broadcast::channel('notification.{id}', function($notification, $id) {
+    return (int) $notification->user_id === (int) $id;
 });

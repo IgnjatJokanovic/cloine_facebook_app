@@ -72,6 +72,7 @@ Route::group(['middleware' => ['jwt']], function () {
 
     Route::prefix('friend')->group(function(){
         Route::post('/markAsRead', [FriendController::class, 'markAsRead']);
+        Route::post('/markAllAsRead', [FriendController::class, 'markAllAsRead']);
         Route::get('/pending', [FriendController::class, 'pending']);
         Route::get('/searchCurrentUser', [FriendController::class, 'searchCurrentUser']);
         Route::get('/recomended', [FriendController::class, 'recomended']);

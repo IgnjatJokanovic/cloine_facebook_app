@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             'birthday' =>  $birthday,
             'email' => 'email1@gmail.com',
             'password' => bcrypt('email1'),
+            'active' =>  true,
         ]);
 
         // has friend 3
@@ -86,6 +87,56 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('email1'),
         ]);
 
+        $pending1 = User::create([
+            'firstName' => 'Pending',
+            'lastName' =>  'One',
+            'birthday' =>  $birthday,
+            'email' => 'email8@gmail.com',
+            'password' => bcrypt('email1'),
+        ]);
+
+        $pending2 = User::create([
+            'firstName' => 'Pending',
+            'lastName' =>  'Two',
+            'birthday' =>  $birthday,
+            'email' => 'email9@gmail.com',
+            'password' => bcrypt('email1'),
+        ]);
+
+
+        $pending3 = User::create([
+            'firstName' => 'Pending',
+            'lastName' =>  'Three',
+            'birthday' =>  $birthday,
+            'email' => 'email10@gmail.com',
+            'password' => bcrypt('email1'),
+        ]);
+
+        $pending4 = User::create([
+            'firstName' => 'Pending',
+            'lastName' =>  'Fout',
+            'birthday' =>  $birthday,
+            'email' => 'email11@gmail.com',
+            'password' => bcrypt('email1'),
+        ]);
+
+        $pending5 = User::create([
+            'firstName' => 'Pending',
+            'lastName' =>  'Five',
+            'birthday' =>  $birthday,
+            'email' => 'email12@gmail.com',
+            'password' => bcrypt('email1'),
+        ]);
+
+        User::create([
+            'firstName' => 'John',
+            'lastName' =>  'Doe',
+            'birthday' =>  $birthday,
+            'email' => 'john@gmail.com',
+            'password' => bcrypt('email1'),
+            'active' => true,
+        ]);
+
         $user1->friendsFrom()->attach([
             $user2->id,
             $user3->id,
@@ -94,6 +145,15 @@ class DatabaseSeeder extends Seeder
             $user6->id,
             $user7->id,
         ], ['accepted' => true]);
+
+
+        $user1->friendsFrom()->attach([
+            $pending1->id,
+            $pending2->id,
+            $pending3->id,
+            $pending4->id,
+            $pending5->id,
+        ], ['accepted' => false, 'opened' => 'false']);
 
         $user2->friendsFrom()->attach([
             $user3->id,

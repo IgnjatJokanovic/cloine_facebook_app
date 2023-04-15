@@ -2,17 +2,17 @@
 
 namespace App\Events;
 
-use App\Models\Notification;
+use App\Dto\FriendRequestDto;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 
-class NewNotification implements ShouldBroadcastNow
+class FriendRequestSent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -22,7 +22,7 @@ class NewNotification implements ShouldBroadcastNow
      * @return void
      */
     public function __construct(
-        public Notification $notification,
+        public FriendRequestDto $user
     )
     {
         //
@@ -32,7 +32,7 @@ class NewNotification implements ShouldBroadcastNow
     {
         // This must always be an array. Since it will be parsed with json_encode()
         return [
-            'notification' => $this->notification,
+            'user' => $this->user
         ];
     }
 
@@ -48,6 +48,6 @@ class NewNotification implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('notification.'.$this->notification->user_id);
+        return new Channel('friendRequestSent.'.$this->user->to);
     }
 }
