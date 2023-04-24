@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
@@ -161,6 +162,12 @@ class User extends Authenticatable implements JWTSubject
                     ->with('profilePhoto.image')
                     ->where('friends.accepted', false)
                     ->orderBy('friends.opened', 'ASC');
+    }
+
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'user_id', 'id');
     }
 
     public static function friendsQuerry(int $id, ?string $search = null, ?int $excluded = null)

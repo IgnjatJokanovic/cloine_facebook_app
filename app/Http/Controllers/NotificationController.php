@@ -12,13 +12,14 @@ class NotificationController extends Controller
 
     public function index()
     {
-        $payload = JWTAuth::parseToken()->getPayload();
-        $id = $payload->get('id');
+        /** @var User $user */
+        $user = auth()->user();
 
-        $data = Notification::with('user')
-                    ->where('user_id', $id)
-                    ->orderBy('created_at', "DESC")
-                    ->paginate(6);
+        $data = Notification::with('user.profilePhoto.image')
+                    ->where('user_id', $user->id)
+                    ->orderBy('opened', "ASC")
+                    ->orderBy('created_at', "ASC")
+                    ?->paginate(6);
 
         return response()->json($data);
     }
@@ -57,10 +58,10 @@ class NotificationController extends Controller
 
     public function markAllAsRead()
     {
-        $payload = JWTAuth::parseToken()->getPayload();
-        $id = $payload->get('id');
+        /** @var User $user */
+        $user = auth()->user();
 
-        Notification::where('user_id', $id)
+        Notification::where('user_id', $user->id)
             ->update(['opened' => true]);
 
         return response()->json('Marked all as read');
@@ -69,10 +70,10 @@ class NotificationController extends Controller
 
     public function unreadCount()
     {
-        $payload = JWTAuth::parseToken()->getPayload();
-        $id = $payload->get('id');
+         /** @var User $user */
+         $user = auth()->user();
 
-        $count = Notification::where('user_id', $id)
+        $count = Notification::where('user_id', $user->id)
                     ->where('opened', false)
                     ->count();
 

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Events\NewNotification;
+use App\Events\NotificationRemoved;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
@@ -34,6 +35,14 @@ class Notification extends Model
            $model->load('user.profilePhoto.image');
            Log::debug("message");
            broadcast(new NewNotification($model))->toOthers();
+        });
+
+        self::deleting(function($model){
+            Log::debug($model);
+            broadcast(new NotificationRemoved(
+                $model->user_id,
+                $model->id,
+            ));
         });
     }
 }

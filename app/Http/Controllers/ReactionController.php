@@ -13,8 +13,6 @@ use App\Models\Reaction;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
-
-use function App\Providers\notifyNotificationRecieved;
 use function App\Providers\notifyReaction;
 
 class ReactionController extends Controller
@@ -72,11 +70,11 @@ class ReactionController extends Controller
             notifyReaction($reacted, 'removed');
             $reacted->delete();
 
-
             Notification::where('post_id', request()->post_id)
                 ->where('creator', $userId)
                 ->where('type', 'reaction')
-                ->delete();
+                ->first()
+                ?->delete();
 
 
             return response()->json(['msg' => 'Removed reaction', 'data' => null], 200);
@@ -88,36 +86,38 @@ class ReactionController extends Controller
         if($post->owner !== $post->creator){
             if($post->owner !== $userId){
 
-                notifyNotificationRecieved(
-                    'Reacted to your post',
-                    $post->owner,
-                    $userId,
-                    $post->id,
-                    'reaction',
-                );
+                Notification::create([
+                    'body' => 'Reacted to your post',
+                    'user_id' => $post->owner,
+                    'creator' => $userId,
+                    'post_id' => $post->id,
+                    'type' => 'reaction',
+                ]);
             }
 
             if($post->creator !== $userId){
 
-                notifyNotificationRecieved(
-                    'Reacted to your post',
-                    $post->creator,
-                    $userId,
-                    $post->id,
-                    'reaction',
-                );
+                Notification::create([
+                    'body' => 'Reacted to your post',
+                    'user_id' => $post->creator,
+                    'creator' => $userId,
+                    'post_id' => $post->id,
+                    'type' => 'reaction',
+                ]);
+
             }
 
         }else{
             if($post->owner !== $userId){
 
-                notifyNotificationRecieved(
-                    'Reacted to your post',
-                    $post->owner,
-                    $userId,
-                    $post->id,
-                    'reaction',
-                );
+                Notification::create([
+                    'body' => 'Reacted to your post',
+                    'user_id' => $post->owner,
+                    'creator' => $userId,
+                    'post_id' => $post->id,
+                    'type' => 'reaction',
+                ]);
+
             }
         }
 
