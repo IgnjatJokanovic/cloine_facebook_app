@@ -9,6 +9,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\FriendController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PasswordController;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\Translation\MessageCatalogue;
@@ -68,6 +69,13 @@ Route::group(['middleware' => ['jwt']], function () {
 
     Route::prefix('reaction')->group(function(){
         Route::get('/users/{postId}/{id}', [ReactionController::class, 'users']);
+    });
+
+    Route::prefix('notification')->group(function(){
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::post('/markAsRead', [NotificationController::class, 'markAsRead']);
+        Route::post('/markAllAsRead', [NotificationController::class, 'markAllAsRead']);
+        Route::get('/unreadCount', [NotificationController::class, 'unreadCount']);
     });
 
     Route::prefix('friend')->group(function(){

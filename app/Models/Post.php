@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Exception;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Log;
 
 class Post extends Model
@@ -106,12 +107,25 @@ class Post extends Model
         return null;
     }
 
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'post_id', 'id');
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class, 'post_id', 'id');
+    }
+
     public static function boot()
     {
         parent::boot();
         static::deleting(function($post){
-            Log::debug('uso u post');
-           $post->image()->delete();
+            if ($post->image) {
+                $post->image->delete();
+            }
+           $post->notifications()?->delete();
         });
     }
 }

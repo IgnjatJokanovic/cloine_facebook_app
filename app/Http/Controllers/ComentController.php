@@ -77,37 +77,52 @@ class ComentController extends Controller
         if($post->owner !== $post->creator){
             if($post->owner !== $userId){
 
-                notifyNotificationRecieved(
-                    'Commented on you post',
-                    $post->owner,
-                    $userId,
-                    $post->id,
-                    'comment',
-                );
+                Notification::create([
+                    'body' => 'Commented on you post',
+                    'user_id' => $post->owner,
+                    'creator' => $userId,
+                    'post_id' => $post->id,
+                    'comment_id' => $comment->id,
+                    'type' => 'comment',
+                ]);
             }
 
             if($post->creator !== $userId){
 
-                notifyNotificationRecieved(
-                    'Commented on you post',
-                    $post->creator,
-                    $userId,
-                    $post->id,
-                    'comment',
-                );
+                Notification::create([
+                    'body' => 'Commented on you post',
+                    'user_id' => $post->creator,
+                    'creator' => $userId,
+                    'post_id' => $post->id,
+                    'comment_id' => $comment->id,
+                    'type' => 'comment',
+                ]);
             }
 
         }else{
             if($post->owner !== $userId){
 
-                notifyNotificationRecieved(
-                    'Commented on you post',
-                    $post->owner,
-                    $userId,
-                    $post->id,
-                    'comment',
-                );
+                Notification::create([
+                    'body' => 'Commented on you post',
+                    'user_id' =>  $post->owner,
+                    'creator' => $userId,
+                    'post_id' => $post->id,
+                    'comment_id' => $comment->id,
+                    'type' => 'comment',
+                ]);
             }
+        }
+
+
+        if($existingComment !== null && $existingComment?->user_id !== $userId){
+            Notification::create([
+                'body' => 'Replied to your comment',
+                'user_id' => $existingComment->user_id,
+                'creator' => $userId,
+                'post_id' => $post->id,
+                'comment_id' => $comment->id,
+                'type' => 'comment',
+            ]);
         }
 
         return response()->json([
@@ -198,18 +213,9 @@ class ComentController extends Controller
         $id = request()->id;
         $comment = Comment::find($id);
 
-        $payload = JWTAuth::parseToken()->getPayload();
-        $userId = $payload->get('id');
-
-
         if($comment === null){
-         return response()->json('Comment not found', 404);
+            return response()->json('Comment not found', 404);
         }
-
-        Notification::where('post_id', $comment->post_id)
-            ->where('creator', $userId)
-            ->where('type', 'comment')
-            ->delete();
 
         $comment->delete();
 

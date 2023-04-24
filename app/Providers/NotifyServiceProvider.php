@@ -9,6 +9,7 @@ use App\Events\NewNotification;
 use App\Events\PostReactedAction;
 use App\Models\Friend;
 use App\Models\Notification;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
 class NotifyServiceProvider extends ServiceProvider
@@ -32,6 +33,7 @@ class NotifyServiceProvider extends ServiceProvider
     {
         function notifyReaction($reaction, string $action): void
         {
+            Log::debug("XCXXX");
             broadcast(new PostReactedAction($reaction, $action));
         }
 

@@ -34,3 +34,7 @@ Broadcast::channel('postReaction.{id}', function($reaction, $id) {
 Broadcast::channel('notification.{id}', function($notification, $id) {
     return (int) $notification->user_id === (int) $id;
 });
+
+Broadcast::channel('notificationRemoved.{id}', function($notification, $id) {
+    return (int) $notification->to === (int) $id;
+});
