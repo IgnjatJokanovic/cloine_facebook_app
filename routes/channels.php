@@ -38,3 +38,16 @@ Broadcast::channel('notification.{id}', function($notification, $id) {
 Broadcast::channel('notificationRemoved.{id}', function($notification, $id) {
     return (int) $notification->to === (int) $id;
 });
+
+Broadcast::channel('newMessage.{id}', function($message, $id) {
+    return (int) $message->to === (int) $id;
+});
+
+Broadcast::channel('messageRemoved.{id}', function($message, $id) {
+    return (int) $message->to === (int) $id;
+});
+
+Broadcast::channel('messageUpdated.{id}', function($obj, $id) {
+    return (int) $obj->to === (int) $id;
+});
+
