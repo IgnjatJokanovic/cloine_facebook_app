@@ -11,6 +11,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class Message extends Model
@@ -175,11 +176,13 @@ class Message extends Model
         });
 
         self::updated(function($model){
-            broadcast(new MessageUpdated($model))->toOthers();
+            broadcast(new MessageUpdated($model));
          });
 
         self::deleting(function($model){
-            broadcast(new MessageDeleted($model))->toOthers();
+            Log::debug("DELETING");
+            Log::debug("$model");
+            broadcast(new MessageDeleted($model));
         });
     }
 }

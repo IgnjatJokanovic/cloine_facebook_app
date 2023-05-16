@@ -8,6 +8,7 @@ use App\Events\MessageRecieved;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Validator;
 
@@ -63,7 +64,7 @@ class MessageController extends Controller
 
         $message = Message::latest($id, $user->id);
 
-        return response()->json($message);
+        return response()->json(['message' => $message]);
     }
 
     /**

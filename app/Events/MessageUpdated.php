@@ -48,6 +48,6 @@ class MessageUpdated implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('messageUpdated.'.$this->message->to);
+        return new Channel('messageUpdated.'.$this->message->from);
     }
 }
