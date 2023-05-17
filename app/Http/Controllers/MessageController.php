@@ -220,9 +220,11 @@ class MessageController extends Controller
             return response()->json(['error' => 'Message not found'], 404);
         }
 
+        $message->delete();
+
         $data = Message::latest($message->to, $user->id);
 
-        $message->delete();
+
 
         return response()->json(['msg' => 'Deleted message', 'data' => $data]);
     }

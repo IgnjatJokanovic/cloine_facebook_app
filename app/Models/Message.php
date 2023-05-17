@@ -134,7 +134,7 @@ class Message extends Model
                     'm1.to',
                     'm1.body',
                     'm1.created_at',
-                    DB::raw("(CASE WHEN (SELECT COUNT(*) FROM messages m2 WHERE m2.from = m1.from AND m2.to = m1.to AND opened = false) > 0 THEN 0 ELSE 1 END) AS opened")
+                    DB::raw("(CASE WHEN (SELECT COUNT(*) FROM messages m3 WHERE m3.from = (CASE m1.to WHEN $userId THEN m1.from ELSE m1.to END) AND m3.to = $userId AND opened = false) > 0 THEN 0 ELSE 1 END) AS opened")
                 )
                 ->first();
     }
