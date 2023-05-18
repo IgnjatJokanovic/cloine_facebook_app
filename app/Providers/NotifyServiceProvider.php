@@ -53,7 +53,7 @@ class NotifyServiceProvider extends ServiceProvider
             int $creator,
             int $postId = null,
             int $commentId = null,
-            string $type = null,
+            string $type = 'post',
         ): void
         {
             Notification::create([
@@ -61,7 +61,7 @@ class NotifyServiceProvider extends ServiceProvider
                 'user_id' => $id,
                 'creator' => $creator,
                 'post_id' => $postId,
-                'comment_id' => $postId,
+                'comment_id' => $commentId,
                 'type' => $type,
             ]);
         }

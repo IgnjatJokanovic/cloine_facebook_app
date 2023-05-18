@@ -37,7 +37,8 @@ class Notification extends Model
            broadcast(new NewNotification($model))->toOthers();
         });
 
-        self::deleting(function($model){
+        self::deleted(function($model){
+            Log::debug("DELETING");
             Log::debug($model);
             broadcast(new NotificationRemoved(
                 $model->user_id,

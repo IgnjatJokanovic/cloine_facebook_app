@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Dto\MessageDto;
+use App\Dto\MessageNotificationDto;
+use App\Events\MessageRecieved;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Validator;
 
@@ -20,6 +24,18 @@ class MessageController extends Controller
                     ->paginate(6);
 
         return response()->json($latest);
+    }
+
+    public function unreadCount()
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        $count = Message::where('to', $user->id)
+                    ->where('opened', false)
+                    ->count();
+
+        return response()->json($count);
     }
 
     public function show(int $id)
@@ -41,6 +57,16 @@ class MessageController extends Controller
         return response()->json($messages);
     }
 
+    public function latest(int $id)
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        $message = Message::latest($id, $user->id);
+
+        return response()->json(['message' => $message]);
+    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -48,8 +74,8 @@ class MessageController extends Controller
      */
     public function create()
     {
-        $payload = JWTAuth::parseToken()->getPayload();
-        $userId = (int)$payload->get('id');
+        /** @var User $user */
+        $user = auth()->user();
 
         $fields = request(
             [
@@ -63,7 +89,7 @@ class MessageController extends Controller
             'body' => 'required',
         ]);
 
-        $fields['from'] = $userId;
+        $fields['from'] = $user->id;
 
 
         if($validator->fails())
@@ -94,6 +120,9 @@ class MessageController extends Controller
 
     public function markAsRead()
     {
+        /** @var User $user */
+        $user = auth()->user();
+
         $fields = request(
             [
                 'ids',
@@ -109,6 +138,25 @@ class MessageController extends Controller
         {
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
+
+        $counter = 0;
+        $related = 0;
+
+        foreach($fields['ids'] as $id){
+            $msg = Message::find($id);
+            $msg->opened = true;
+            $msg->update();
+            $counter++;
+            $related = $msg->from;
+        }
+
+        $open = Message::where([
+            'to' => $user->id,
+            'from' => $related,
+            'opened' => false,
+        ])->count() > 0;
+
+        return response()->json(['count' => $counter, 'opened' => $open]);
     }
 
     public function update()
@@ -163,6 +211,9 @@ class MessageController extends Controller
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
 
+        /** @var User $user */
+        $user = auth()->user();
+
         $message = Message::find($fields['id']);
 
         if($message === null){
@@ -171,6 +222,10 @@ class MessageController extends Controller
 
         $message->delete();
 
-        return response()->json(['msg' => 'Deleted message']);
+        $data = Message::latest($message->to, $user->id);
+
+
+
+        return response()->json(['msg' => 'Deleted message', 'data' => $data]);
     }
 }

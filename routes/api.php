@@ -106,6 +106,7 @@ Route::group(['middleware' => ['jwt']], function () {
         Route::post('/search', [MessageController::class, 'search']);
         Route::post('/markAsRead', [MessageController::class, 'markAsRead']);
         Route::get('/unreadCount', [MessageController::class, 'unreadCount']);
+        Route::get('/latest/{id}', [MessageController::class, 'latest']);
     });
 
     Route::prefix('password')->group(function(){
