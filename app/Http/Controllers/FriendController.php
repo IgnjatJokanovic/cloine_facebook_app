@@ -89,6 +89,19 @@ class FriendController extends Controller
     }
 
 
+    public function searchUser()
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        $search = request()->search;
+        $userId = request()->id;
+
+        $friends =  User::friendsQuerry($userId, $search);
+
+        return response()->json($friends->paginate(6));
+    }
+
     public function searchCurrentUser()
     {
         /** @var User $user */

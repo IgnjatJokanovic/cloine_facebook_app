@@ -239,7 +239,8 @@ class User extends Authenticatable implements JWTSubject
                             ->where(function($q) use($id){
                                 $q->whereNot('friends.to', $id)
                                 ->whereNot('friends.from', $id);
-                            });
+                            })
+                            ->whereNotIn('users.id', $friendIds);
 
         return $friendsOfFriends;
     }
