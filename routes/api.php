@@ -82,6 +82,7 @@ Route::group(['middleware' => ['jwt']], function () {
         Route::post('/markAsRead', [FriendController::class, 'markAsRead']);
         Route::post('/markAllAsRead', [FriendController::class, 'markAllAsRead']);
         Route::get('/pending', [FriendController::class, 'pending']);
+        Route::post('/searchUser', [FriendController::class, 'searchUser']);
         Route::get('/searchCurrentUser', [FriendController::class, 'searchCurrentUser']);
         Route::get('/recomended', [FriendController::class, 'recomended']);
         Route::get('/unreadCount', [FriendController::class, 'unreadCount']);
