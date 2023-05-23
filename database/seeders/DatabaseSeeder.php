@@ -93,6 +93,33 @@ class DatabaseSeeder extends Seeder
             'active' =>  true,
         ]);
 
+        $user8 = User::create([
+            'firstName' => 'Mutual',
+            'lastName' =>  'Friend',
+            'birthday' =>  $birthday,
+            'email' => 'email23@gmail.com',
+            'password' => bcrypt('email1'),
+            'active' =>  true,
+        ]);
+
+        $user9 = User::create([
+            'firstName' => 'Mutual',
+            'lastName' =>  'Friend 2',
+            'birthday' =>  $birthday,
+            'email' => 'email22@gmail.com',
+            'password' => bcrypt('email1'),
+            'active' =>  true,
+        ]);
+
+        $user10 = User::create([
+            'firstName' => 'Mutual',
+            'lastName' =>  'Friend 3',
+            'birthday' =>  $birthday,
+            'email' => 'email21@gmail.com',
+            'password' => bcrypt('email1'),
+            'active' =>  true,
+        ]);
+
         $pending1 = User::create([
             'firstName' => 'Pending',
             'lastName' =>  'One',
@@ -163,6 +190,9 @@ class DatabaseSeeder extends Seeder
 
         $user2->friendsFrom()->attach([
             $user3->id,
+            $user8->id,
+            $user9->id,
+            $user10->id,
         ], ['accepted' => true]);
 
         Emoji::create(["code" => "&#x1f600;"]);
