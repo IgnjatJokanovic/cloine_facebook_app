@@ -44,6 +44,7 @@ class DatabaseSeeder extends Seeder
             'birthday' =>  $birthday,
             'email' => 'email2@gmail.com',
             'password' => bcrypt('email1'),
+            'active' =>  true,
         ]);
 
         $user3 = User::create([
@@ -52,6 +53,7 @@ class DatabaseSeeder extends Seeder
             'birthday' =>  $birthday,
             'email' => 'email3@gmail.com',
             'password' => bcrypt('email1'),
+            'active' =>  true,
         ]);
 
 
@@ -61,6 +63,7 @@ class DatabaseSeeder extends Seeder
             'birthday' =>  $birthday,
             'email' => 'email4@gmail.com',
             'password' => bcrypt('email1'),
+            'active' =>  true,
         ]);
 
         $user5 = User::create([
@@ -69,6 +72,7 @@ class DatabaseSeeder extends Seeder
             'birthday' =>  $birthday,
             'email' => 'email5@gmail.com',
             'password' => bcrypt('email1'),
+            'active' =>  true,
         ]);
 
         $user6 = User::create([
@@ -77,6 +81,7 @@ class DatabaseSeeder extends Seeder
             'birthday' =>  $birthday,
             'email' => 'email6@gmail.com',
             'password' => bcrypt('email1'),
+            'active' =>  true,
         ]);
 
         $user7 = User::create([
@@ -85,6 +90,7 @@ class DatabaseSeeder extends Seeder
             'birthday' =>  $birthday,
             'email' => 'email7@gmail.com',
             'password' => bcrypt('email1'),
+            'active' =>  true,
         ]);
 
         $pending1 = User::create([
