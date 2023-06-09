@@ -24,6 +24,10 @@ class MessageController extends Controller
         $latest = Message::latestMessages($userId)
                     ->paginate(6);
 
+        Log::debug(Message::latestMessages($userId)->toSql());
+
+        $latestMessages = Message::where('from', 1)->orWhere('to', 1)->orderBy('created_at', 'desc')->get();
+
         return response()->json($latest);
     }
 
@@ -91,6 +95,7 @@ class MessageController extends Controller
         ]);
 
         $fields['from'] = $user->id;
+        $fields['opened'] = false;
 
 
         if($validator->fails())
