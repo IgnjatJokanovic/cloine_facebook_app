@@ -189,8 +189,14 @@ class Message extends Model
         });
 
         self::updated(function($model){
-            broadcast(new MessageUpdated($model));
-         });
+            $originalModel = $model->getOriginal();
+            if($originalModel['opened'] != $model->opened){
+                $id = $model->from;
+            }else{
+                $id = $model->to;
+            }
+            broadcast(new MessageUpdated($model, $id));
+        });
 
         self::deleting(function($model){
             Log::debug("DELETING");

@@ -56,8 +56,8 @@ class MessageController extends Controller
                         $q->where('to', $id)
                             ->where('from', $userId);
                     })
-                    ->orderBy('created_at', 'ASC')
-                    ->paginate(10);
+                    ->orderBy('created_at', 'DESC')
+                    ->paginate(2);
 
         return response()->json($messages);
     }

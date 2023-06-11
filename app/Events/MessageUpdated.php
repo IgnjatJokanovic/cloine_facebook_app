@@ -23,6 +23,7 @@ class MessageUpdated implements ShouldBroadcastNow
      */
     public function __construct(
         public Message $message,
+        public int $id,
     )
     {
         //
@@ -48,6 +49,6 @@ class MessageUpdated implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('messageUpdated.'.$this->message->from);
+        return new Channel('messageUpdated.'.$this->id);
     }
 }
