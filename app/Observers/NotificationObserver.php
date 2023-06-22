@@ -37,7 +37,6 @@ class NotificationObserver
      */
     public function deleted(Notification $notification)
     {
-        Log::debug("deleted");
 
     }
 
@@ -60,6 +59,6 @@ class NotificationObserver
      */
     public function forceDeleted(Notification $notification)
     {
-        Log::debug("forceDeleted");
+    
     }
 }

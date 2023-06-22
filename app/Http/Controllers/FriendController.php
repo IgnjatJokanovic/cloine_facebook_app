@@ -115,7 +115,6 @@ class FriendController extends Controller
         $friends =  User::friendsQuerry($userId, $search);
 
         if((int)$exlude !== (int)$userId){
-            Log::debug("$exlude, $userId");
             $friends->where('users.id', '!=', $exlude);
         }
 

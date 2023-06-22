@@ -33,7 +33,6 @@ class NotifyServiceProvider extends ServiceProvider
     {
         function notifyReaction($reaction, string $action): void
         {
-            Log::debug("XCXXX");
             broadcast(new PostReactedAction($reaction, $action));
         }
 

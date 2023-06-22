@@ -102,7 +102,7 @@ class UserController extends Controller
         $data = User::with('profilePhoto.image')
                     ->where('users.firstName', 'ILIKE', "%$search%")
                     ->orWhere('users.lastName', "ILIKE", "%$search%")
-                    ->paginate(1);
+                    ->paginate(5);
 
         return response()->json($data);
     }

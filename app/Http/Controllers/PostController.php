@@ -319,7 +319,6 @@ class PostController extends Controller
         }
         $image = $post->image()->first();
         if($image !== null){
-            Log::debug('uso');
             \File::delete(public_path() . $image->src);
         }
         $post->delete();

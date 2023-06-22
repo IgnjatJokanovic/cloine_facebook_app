@@ -199,8 +199,6 @@ class Message extends Model
         });
 
         self::deleting(function($model){
-            Log::debug("DELETING");
-            Log::debug("$model");
             broadcast(new MessageDeleted($model));
         });
     }
