@@ -5,7 +5,7 @@ namespace App\Dto;
 class MessageNotificationDto{
 
     public function __construct(
-        public string $id,
+        public int $id,
         public string $firstName,
         public string $lastName,
         public string|null $profile,

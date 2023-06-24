@@ -22,6 +22,7 @@ class Message extends Model
         'body',
         'from',
         'to',
+        'opened'
     ];
 
     // protected $appends = ['isRead'];
@@ -35,7 +36,8 @@ class Message extends Model
 
         return self::where([
                     'to' => $user->id,
-                    'from' => $participant
+                    'from' => $participant,
+                    'opened' => false,
                 ])->count() > 0;
     }
 
@@ -48,21 +50,28 @@ class Message extends Model
     public static function latestMessages(int $userId)
     {
         return DB::table('messages AS m1')
-                ->leftjoin('messages AS m2', function($join) {
-                    $join->on('m1.from', '=', 'm2.from');
-                    $join->on('m1.id', '<', 'm2.id');
-                })
-                ->whereNull('m2.id')
                 ->where(function($q) use($userId){
                     $q->where('m1.to', $userId)
                         ->orWHere('m1.from', $userId);
+                })
+                ->where('m1.created_at', function($q){
+                    $q->select(DB::raw('MAX(m3.created_at)'))
+                        ->from('messages AS m3')
+                        ->where(function($q){
+                            $q->where('m3.from', DB::raw('m1.from'))
+                                ->where('m3.to', DB::raw('m1.to'));
+                        })
+                        ->orWhere(function($q){
+                            $q->where('m3.from', DB::raw('m1.to'))
+                                ->where('m3.to', DB::raw('m1.from'));
+                        });
                 })
                 ->join('users', function ($join) use ($userId) {
                     $join->on(DB::raw('CASE m1.to WHEN '.$userId.' THEN m1.from ELSE m1.to END'), '=', 'users.id');
                 })
                 ->leftJoin('posts', 'users.profile', '=', 'posts.id')
                 ->leftJoin('images', 'posts.image_id', '=', 'images.id')
-                ->orderBy('m1.created_at', 'DESC')
+                ->orderBy('m1.opened', 'ASC')
                 ->select(
                     'users.id',
                     'users.firstName',
@@ -120,7 +129,9 @@ class Message extends Model
                     $q->where('to', $id)
                         ->where('from', $userId);
                 })
-                ->join('users', 'users.id', '=', 'm1.from')
+                ->join('users', function ($join) use ($userId) {
+                    $join->on(DB::raw('CASE m1.to WHEN '.$userId.' THEN m1.from ELSE m1.to END'), '=', 'users.id');
+                })
                 ->leftJoin('posts', 'users.profile', '=', 'posts.id')
                 ->leftJoin('images', 'posts.image_id', '=', 'images.id')
                 ->orderBy('m1.created_at', 'DESC')
@@ -150,6 +161,8 @@ class Message extends Model
                 $message->id,
                 $message->user->firstName,
                 $message->user->lastName,
+                $message->from,
+                $message->to,
                 $message->user?->profilePhoto?->image?->src,
                 $message->body,
                 $message->created_at,
@@ -176,12 +189,16 @@ class Message extends Model
         });
 
         self::updated(function($model){
-            broadcast(new MessageUpdated($model));
-         });
+            $originalModel = $model->getOriginal();
+            if($originalModel['opened'] != $model->opened){
+                $id = $model->from;
+            }else{
+                $id = $model->to;
+            }
+            broadcast(new MessageUpdated($model, $id));
+        });
 
         self::deleting(function($model){
-            Log::debug("DELETING");
-            Log::debug("$model");
             broadcast(new MessageDeleted($model));
         });
     }

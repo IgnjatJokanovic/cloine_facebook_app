@@ -50,7 +50,6 @@ class NotificationRemoved implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        Log::debug($this->to);
         return new Channel('notificationRemoved.'.$this->to);
     }
 }

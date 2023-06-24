@@ -8,6 +8,7 @@ use App\Events\MessageRecieved;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Validator;
@@ -51,8 +52,8 @@ class MessageController extends Controller
                         $q->where('to', $id)
                             ->where('from', $userId);
                     })
-                    ->orderBy('created_at', 'ASC')
-                    ->paginate(10);
+                    ->orderBy('created_at', 'DESC')
+                    ->paginate(6);
 
         return response()->json($messages);
     }
@@ -90,6 +91,7 @@ class MessageController extends Controller
         ]);
 
         $fields['from'] = $user->id;
+        $fields['opened'] = false;
 
 
         if($validator->fails())
@@ -126,6 +128,7 @@ class MessageController extends Controller
         $fields = request(
             [
                 'ids',
+                'related',
             ]
         );
 
@@ -140,21 +143,19 @@ class MessageController extends Controller
         }
 
         $counter = 0;
-        $related = 0;
 
         foreach($fields['ids'] as $id){
             $msg = Message::find($id);
             $msg->opened = true;
-            $msg->update();
+            $msg->save();
             $counter++;
-            $related = $msg->from;
         }
 
         $open = Message::where([
             'to' => $user->id,
-            'from' => $related,
+            'from' => request()->related,
             'opened' => false,
-        ])->count() > 0;
+        ])->count() == 0;
 
         return response()->json(['count' => $counter, 'opened' => $open]);
     }

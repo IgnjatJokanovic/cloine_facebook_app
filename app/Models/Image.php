@@ -21,7 +21,6 @@ class Image extends Model
 
         static::deleting(function($image)
         {
-            Log::debug('uso');
             \File::delete(public_path() . $image->src);
         });
     }

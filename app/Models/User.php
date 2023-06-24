@@ -206,8 +206,6 @@ class User extends Authenticatable implements JWTSubject
             $query->where('users.id', $excluded);
         }
 
-        Log::debug($query->get());
-
         return $query;
     }
 

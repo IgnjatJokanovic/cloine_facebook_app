@@ -29,8 +29,8 @@ class DatabaseSeeder extends Seeder
 
         // has all friends 2-7
         $user1 = User::create([
-            'firstName' => 'Johny',
-            'lastName' =>  'Cage',
+            'firstName' => 'Ignjat',
+            'lastName' =>  'Jokanovic',
             'birthday' =>  $birthday,
             'email' => 'email1@gmail.com',
             'password' => bcrypt('email1'),
@@ -39,8 +39,8 @@ class DatabaseSeeder extends Seeder
 
         // has friend 3
         $user2 = User::create([
-            'firstName' => 'Shao',
-            'lastName' =>  'Kahn',
+            'firstName' => 'Nikola',
+            'lastName' =>  'Kojo',
             'birthday' =>  $birthday,
             'email' => 'email2@gmail.com',
             'password' => bcrypt('email1'),
@@ -48,8 +48,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $user3 = User::create([
-            'firstName' => 'Liu',
-            'lastName' =>  'Kang',
+            'firstName' => 'Anica',
+            'lastName' =>  'Dobra',
             'birthday' =>  $birthday,
             'email' => 'email3@gmail.com',
             'password' => bcrypt('email1'),
@@ -58,8 +58,8 @@ class DatabaseSeeder extends Seeder
 
 
         $user4 = User::create([
-            'firstName' => 'Sub',
-            'lastName' =>  'Zero',
+            'firstName' => 'Dragan',
+            'lastName' =>  'Bjelogrlic',
             'birthday' =>  $birthday,
             'email' => 'email4@gmail.com',
             'password' => bcrypt('email1'),
@@ -67,8 +67,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $user5 = User::create([
-            'firstName' => 'Freddy',
-            'lastName' =>  'Cruger',
+            'firstName' => 'Tamara',
+            'lastName' =>  'Aleksic',
             'birthday' =>  $birthday,
             'email' => 'email5@gmail.com',
             'password' => bcrypt('email1'),
@@ -76,8 +76,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $user6 = User::create([
-            'firstName' => 'Miki',
-            'lastName' =>  'Maus',
+            'firstName' => 'Zoran',
+            'lastName' =>  'Cvijanovic',
             'birthday' =>  $birthday,
             'email' => 'email6@gmail.com',
             'password' => bcrypt('email1'),
@@ -85,8 +85,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $user7 = User::create([
-            'firstName' => 'Pera',
-            'lastName' =>  'Zdera',
+            'firstName' => 'Andrija',
+            'lastName' =>  'Mandic',
             'birthday' =>  $birthday,
             'email' => 'email7@gmail.com',
             'password' => bcrypt('email1'),
@@ -94,8 +94,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $user8 = User::create([
-            'firstName' => 'Mutual',
-            'lastName' =>  'Friend',
+            'firstName' => 'Milena',
+            'lastName' =>  'Popovic',
             'birthday' =>  $birthday,
             'email' => 'email23@gmail.com',
             'password' => bcrypt('email1'),
@@ -103,8 +103,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $user9 = User::create([
-            'firstName' => 'Mutual',
-            'lastName' =>  'Friend 2',
+            'firstName' => 'Seka',
+            'lastName' =>  'Sabic',
             'birthday' =>  $birthday,
             'email' => 'email22@gmail.com',
             'password' => bcrypt('email1'),
@@ -112,8 +112,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $user10 = User::create([
-            'firstName' => 'Mutual',
-            'lastName' =>  'Friend 3',
+            'firstName' => 'Bora',
+            'lastName' =>  'Todorovic',
             'birthday' =>  $birthday,
             'email' => 'email21@gmail.com',
             'password' => bcrypt('email1'),
@@ -121,49 +121,54 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $pending1 = User::create([
-            'firstName' => 'Pending',
-            'lastName' =>  'One',
+            'firstName' => 'Branka',
+            'lastName' =>  'Katic',
             'birthday' =>  $birthday,
             'email' => 'email8@gmail.com',
             'password' => bcrypt('email1'),
+            'active' =>  true,
         ]);
 
         $pending2 = User::create([
-            'firstName' => 'Pending',
-            'lastName' =>  'Two',
+            'firstName' => 'Nebojsa',
+            'lastName' =>  'Glogovac',
             'birthday' =>  $birthday,
             'email' => 'email9@gmail.com',
             'password' => bcrypt('email1'),
+            'active' =>  true,
         ]);
 
 
         $pending3 = User::create([
-            'firstName' => 'Pending',
-            'lastName' =>  'Three',
+            'firstName' => 'Marta',
+            'lastName' =>  'Bjelica',
             'birthday' =>  $birthday,
             'email' => 'email10@gmail.com',
             'password' => bcrypt('email1'),
+            'active' =>  true,
         ]);
 
         $pending4 = User::create([
-            'firstName' => 'Pending',
-            'lastName' =>  'Fout',
+            'firstName' => 'Dusica',
+            'lastName' =>  'Zagerac',
             'birthday' =>  $birthday,
             'email' => 'email11@gmail.com',
             'password' => bcrypt('email1'),
+            'active' =>  true,
         ]);
 
         $pending5 = User::create([
-            'firstName' => 'Pending',
-            'lastName' =>  'Five',
+            'firstName' => 'Petar',
+            'lastName' =>  'Kralj',
             'birthday' =>  $birthday,
             'email' => 'email12@gmail.com',
             'password' => bcrypt('email1'),
+            'active' =>  true,
         ]);
 
         User::create([
-            'firstName' => 'John',
-            'lastName' =>  'Doe',
+            'firstName' => 'Ljubisa',
+            'lastName' =>  'Samardzic',
             'birthday' =>  $birthday,
             'email' => 'john@gmail.com',
             'password' => bcrypt('email1'),

@@ -33,13 +33,10 @@ class Notification extends Model
 
         self::created(function($model){
            $model->load('user.profilePhoto.image');
-           Log::debug("message");
            broadcast(new NewNotification($model))->toOthers();
         });
 
         self::deleted(function($model){
-            Log::debug("DELETING");
-            Log::debug($model);
             broadcast(new NotificationRemoved(
                 $model->user_id,
                 $model->id,
