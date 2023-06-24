@@ -131,6 +131,8 @@ class PostController extends Controller
 
         $isProfile = $fields['isProfile'] ?? null;
 
+        $msg = "Post created";
+
         if($isProfile !== null){
             $post->load('image');
             $msg = 'Updated cover photo';
@@ -207,7 +209,7 @@ class PostController extends Controller
                         'image',
                         'emotion',
                         'distinctReactions',
-                        'taged',
+                        'taged.profilePhoto.image',
                     ]
                 )
                 ->where('id', $id)
@@ -257,10 +259,10 @@ class PostController extends Controller
             return response()->json(['error' => 'Post not found'], 404);
         }
 
-        $taged = request()->taged;
+        $taged = request()->taged ?? [];
 
-        if($taged !== null){
-            $ids = collect($taged)->pluck('id');
+        if(count($taged) > 0){
+            $ids = collect($taged)->pluck('id')->toArray();
             $old = $post->taged()->pluck('user_id')->toArray();
             $post->taged()->sync($ids);
 
@@ -272,7 +274,7 @@ class PostController extends Controller
                     notifyNotificationRecieved(
                         'Has tagged you in a post',
                         $id,
-                        $fields['creator'],
+                        $post->creator,
                         $post->id
                     );
                 }
@@ -297,7 +299,17 @@ class PostController extends Controller
         $post->emotion_id = $emotion;
         $post->update();
 
-        $post = Post::with('owner', 'creator', 'image', 'emotion')->where('id', request()->id)->first();
+        $post = Post::with([
+                    'owner.profilePhoto.image',
+                    'creator.profilePhoto.image',
+                    'image',
+                    'emotion',
+                    'distinctReactions',
+                    'taged.profilePhoto.image',
+                ])
+                ->withCount('distinctReactions')
+                ->where('id', request()->id)
+                ->first();
 
 
 

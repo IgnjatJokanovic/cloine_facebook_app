@@ -165,9 +165,20 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function delete()
     {
-        //
+        /** @var User $user */
+        $user = auth()->user();
+
+        $userModel = User::find($user->id);
+
+        if($userModel == null){
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        $userModel->delete();
+
+        return response()->json(['msg' => 'Profile deleted']);
     }
 
     public function updatePhoto()

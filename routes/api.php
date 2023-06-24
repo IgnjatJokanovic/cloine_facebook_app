@@ -91,6 +91,7 @@ Route::group(['middleware' => ['jwt']], function () {
     Route::prefix('user')->group(function(){
         Route::post('/search', [UserController::class, 'search']);
         Route::post('/update', [UserController::class, 'update']);
+        Route::post('/delete', [UserController::class, 'delete']);
     });
 
     Route::prefix('auth')->group(function(){
@@ -145,6 +146,7 @@ Route::group(['middleware' => ['jwt']], function () {
             Route::post('/create', [PostController::class, 'create']);
             Route::post('/update', [PostController::class, 'update']);
             Route::post('/delete', [PostController::class, 'delete']);
+            Route::get('/edit/{id}', [PostController::class, 'edit']);
         });
 
     });
