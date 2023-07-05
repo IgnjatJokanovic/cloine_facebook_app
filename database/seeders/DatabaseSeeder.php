@@ -219,7 +219,7 @@ class DatabaseSeeder extends Seeder
         Emoji::create(["code" => "&#x1f929;"]);
         Emoji::create(["code" => "&#x1f618;"]);
         Emoji::create(["code" => "&#x1f617;"]);
-        Emoji::create(["code" => "&#x263a;"]);
+        // Emoji::create(["code" => "&#x263a;"]);
         Emoji::create(["code" => "&#x1f61a;"]);
         Emoji::create(["code" => "&#x1f619;"]);
         Emoji::create(["code" => "&#x1f972;"]);
