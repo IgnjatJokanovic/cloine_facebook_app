@@ -71,7 +71,7 @@ class Message extends Model
                 })
                 ->leftJoin('posts', 'users.profile', '=', 'posts.id')
                 ->leftJoin('images', 'posts.image_id', '=', 'images.id')
-                ->orderBy('m1.opened', 'ASC')
+                ->orderBy('m1.created_at', 'DESC')
                 ->select(
                     'users.id',
                     'users.firstName',
